@@ -9,5 +9,8 @@ Käyttäjä voi luoda sovelluksia, joilla on nimi, kuvaus ja linkki lähdekoodii
 muualle, missä sovellusta voi käyttää (esim. verkkosivu).
 Sovelluksen sivulla käyttäjä voi arvostella sovelluksen kommentilla ja arvosanalla 1-5.
 Sovelluksen arvosanojen keskiarvosta lasketaan sovelluksen arvosana.
-
+Sovelluksille voidaan määrittää sovelluksen tyypin mukaan luokkia, kuten komentorivin ohjelma,
+Linux, verkkosivu, tms.
 Sivustolla voi hakea sovelluksia nimen ja kuvauksen perusteella.
+Käyttäjäsivulta näkee käyttäjän jakamat sovellukset ja niiden määrän.
+
