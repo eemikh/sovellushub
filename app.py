@@ -94,9 +94,18 @@ def create():
 @app.route("/p/<int:program_id>")
 def program_page(program_id):
     try:
-        name, author_name, source_link, download_link, description = db.query("SELECT p.name, u.username, p.source_link, p.download_link, p.description FROM programs p, users u WHERE p.author = u.id and p.id = ?", [program_id])[0]
+        name, author_name, author_id, source_link, download_link, description, program_id = db.query("SELECT p.name, u.username, u.id, p.source_link, p.download_link, p.description, p.id FROM programs p, users u WHERE p.author = u.id and p.id = ?", [program_id])[0]
     except IndexError:
         flash("Sovellusta ei löytynyt")
         return redirect("/", 404)
 
-    return render_template("program.html", name=name, author_name=author_name, source_link=source_link, download_link=download_link, description=description)
+    return render_template("program.html", name=name, author_name=author_name, author_id=author_id, source_link=source_link, download_link=download_link, description=description, program_id=program_id)
+
+@app.route("/p/<int:program_id>/delete", methods=["POST"])
+def delete_program(program_id):
+    if "user_id" not in session:
+        return redirect("/", 404)
+
+    db.execute("DELETE FROM programs WHERE id = ? AND author = ?", [program_id, session["user_id"]])
+
+    return redirect ("/")
