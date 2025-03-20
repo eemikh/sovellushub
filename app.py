@@ -114,6 +114,30 @@ def program_page(program_id):
 
     return render_template("program.html", name=name, author_name=author_name, author_id=author_id, source_link=source_link, download_link=download_link, description=description, program_id=program_id)
 
+@app.route("/p/<int:program_id>/edit")
+def program_edit_page(program_id):
+    try:
+        name, source_link, download_link, description, program_id = db.query("SELECT p.name, p.source_link, p.download_link, p.description, p.id FROM programs p, users u WHERE p.author = u.id and p.id = ?", [program_id])[0]
+    except IndexError:
+        flash("Sovellusta ei löytynyt")
+        return redirect("/", 404)
+
+    return render_template("edit.html", name=name, source_link=source_link, download_link=download_link, description=description, program_id=program_id)
+
+@app.route("/p/<int:program_id>/edit", methods=["POST"])
+def program_edit(program_id):
+    if "username" not in session:
+        return redirect("/", code=403)
+
+    name = request.form["name"]
+    source_link = request.form["source_link"]
+    download_link = request.form["download_link"]
+    description = request.form["description"]
+
+    db.execute("UPDATE programs SET name = ?, source_link = ?, download_link = ?, description = ? WHERE id = ? and author = ?", [name, source_link, download_link, description, program_id, session["user_id"]])
+
+    return redirect(f"/p/{program_id}")
+
 @app.route("/p/<int:program_id>/delete", methods=["POST"])
 def delete_program(program_id):
     if "user_id" not in session:

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="/p/{{ program_id }}/edit" method="post">
+  <label for="name">Sovelluksen nimi:</label> <br/>
+  <input type="text" id="name" name="name" size="40" value="{{ name }}" requided /> <br/>
+
+  <label for="source_link">Linkki sovelluksen lähdekoodiin:</label> <br/>
+  <input type="text" id="source_link" name="source_link" size="40" value="{{ source_link }}" required /> <br/>
+
+  <label for="download_link">Linkki sovelluksen lataukseen:</label> <br/>
+  <input type="text" id="download_link" name="download_link" size="40" value="{{ download_link }}" required /> <br/>
+
+  <label for="description">Sovelluksen kuvaus:</label> <br/>
+  <textarea id="description" name="description" rows=10 cols=80 required>{{ description }}</textarea> <br/>
+
+  <input type="submit" value="Tallenna" />
+</form>
+{% endblock %}

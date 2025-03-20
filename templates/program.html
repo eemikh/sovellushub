@@ -13,6 +13,10 @@
 <p>{{ description }}</p>
 
 {% if session.user_id == author_id %}
+<form action="/p/{{ program_id }}/edit">
+  <input type="submit" value="Muokkaa sovellusta"></input>
+</form>
+
 <form action="/p/{{ program_id }}/delete" method="post">
   <input type="submit" value="Poista sovellus"></input>
 </form>
