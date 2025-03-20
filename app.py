@@ -13,8 +13,8 @@ db = Database("database.db")
 @app.route("/")
 def index():
     # TODO: pagination
-    programs = db.query("SELECT p.id, p.name, p.description, u.username FROM programs p, users u where u.id = p.author order by p.id desc")
-    programs = [{"id": p[0], "name": p[1], "description": p[2], "author_name": p[3]} for p in programs]
+    programs = db.query("SELECT p.id, p.name, p.description, u.username, IFNULL(AVG(r.grade), 0) FROM programs p, users u LEFT JOIN reviews r ON r.program = p.id WHERE u.id = p.author GROUP BY p.id ORDER BY p.id DESC")
+    programs = [{"id": p[0], "name": p[1], "description": p[2], "author_name": p[3], "grade": p[4]} for p in programs]
 
     return render_template("index.html", programs=programs)
 
@@ -26,8 +26,8 @@ def search():
     searchtext = request.args["text"]
 
     # TODO: pagination
-    programs = db.query("SELECT p.id, p.name, p.description, u.username FROM programs p, users u where u.id = p.author and (p.name like ? or p.description like ?) order by p.id desc", ["%" + searchtext + "%", "%" + searchtext + "%"])
-    programs = [{"id": p[0], "name": p[1], "description": p[2], "author_name": p[3]} for p in programs]
+    programs = db.query("SELECT p.id, p.name, p.description, u.username, IFNULL(AVG(r.grade), 0) FROM programs p, users u LEFT JOIN reviews r ON r.program = p.id WHERE u.id = p.author AND (p.name LIKE ? OR p.description LIKE ?) GROUP BY p.id ORDER BY p.id DESC", ["%" + searchtext + "%", "%" + searchtext + "%"])
+    programs = [{"id": p[0], "name": p[1], "description": p[2], "author_name": p[3], "grade": p[4]} for p in programs]
 
     return render_template("search.html", programs=programs)
 
@@ -108,22 +108,22 @@ def create():
 @app.route("/p/<int:program_id>")
 def program_page(program_id):
     try:
-        name, author_name, author_id, source_link, download_link, description, program_id = db.query("SELECT p.name, u.username, u.id, p.source_link, p.download_link, p.description, p.id FROM programs p, users u WHERE p.author = u.id and p.id = ?", [program_id])[0]
+        name, author_name, author_id, source_link, download_link, description, grade = db.query("SELECT p.name, u.username, u.id, p.source_link, p.download_link, p.description, IFNULL(AVG(r.grade), 0) FROM programs p, users u LEFT JOIN reviews r ON r.program = p.id WHERE p.author = u.id AND p.id = ?", [program_id])[0]
     except IndexError:
         flash("Sovellusta ei löytynyt")
         return redirect("/", 404)
 
-    reviews = db.query("SELECT r.grade, r.comment, u.username FROM users u, programs p LEFT JOIN reviews r ON r.program = p.id WHERE u.id = r.author and p.id = ?", [program_id])
+    reviews = db.query("SELECT r.grade, r.comment, u.username FROM users u, programs p LEFT JOIN reviews r ON r.program = p.id WHERE u.id = r.author AND p.id = ?", [program_id])
     reviews = [{"grade": r[0], "comment": r[1], "username": r[2]} for r in reviews]
 
     can_review = "user_id" in session
 
-    return render_template("program.html", name=name, author_name=author_name, author_id=author_id, source_link=source_link, download_link=download_link, description=description, program_id=program_id, can_review=can_review, reviews=reviews)
+    return render_template("program.html", name=name, author_name=author_name, author_id=author_id, source_link=source_link, download_link=download_link, description=description, program_id=program_id, can_review=can_review, reviews=reviews, grade=grade)
 
 @app.route("/p/<int:program_id>/edit")
 def program_edit_page(program_id):
     try:
-        name, source_link, download_link, description, program_id = db.query("SELECT p.name, p.source_link, p.download_link, p.description, p.id FROM programs p, users u WHERE p.author = u.id and p.id = ?", [program_id])[0]
+        name, source_link, download_link, description, program_id = db.query("SELECT p.name, p.source_link, p.download_link, p.description, p.id FROM programs p, users u WHERE p.author = u.id AND p.id = ?", [program_id])[0]
     except IndexError:
         flash("Sovellusta ei löytynyt")
         return redirect("/", 404)
@@ -140,7 +140,7 @@ def program_edit(program_id):
     download_link = request.form["download_link"]
     description = request.form["description"]
 
-    db.execute("UPDATE programs SET name = ?, source_link = ?, download_link = ?, description = ? WHERE id = ? and author = ?", [name, source_link, download_link, description, program_id, session["user_id"]])
+    db.execute("UPDATE programs SET name = ?, source_link = ?, download_link = ?, description = ? WHERE id = ? AND author = ?", [name, source_link, download_link, description, program_id, session["user_id"]])
 
     return redirect(f"/p/{program_id}")
 
