@@ -113,7 +113,12 @@ def program_page(program_id):
         flash("Sovellusta ei löytynyt")
         return redirect("/", 404)
 
-    return render_template("program.html", name=name, author_name=author_name, author_id=author_id, source_link=source_link, download_link=download_link, description=description, program_id=program_id)
+    reviews = db.query("SELECT r.grade, r.comment, u.username FROM users u, programs p LEFT JOIN reviews r ON r.program = p.id WHERE u.id = r.author and p.id = ?", [program_id])
+    reviews = [{"grade": r[0], "comment": r[1], "username": r[2]} for r in reviews]
+
+    can_review = "user_id" in session
+
+    return render_template("program.html", name=name, author_name=author_name, author_id=author_id, source_link=source_link, download_link=download_link, description=description, program_id=program_id, can_review=can_review, reviews=reviews)
 
 @app.route("/p/<int:program_id>/edit")
 def program_edit_page(program_id):
@@ -147,6 +152,28 @@ def delete_program(program_id):
     db.execute("DELETE FROM programs WHERE id = ? AND author = ?", [program_id, session["user_id"]])
 
     return redirect ("/")
+
+@app.route("/p/<int:program_id>/review", methods=["POST"])
+def review(program_id):
+    grade = request.form["grade"]
+    comment = request.form["comment"]
+
+    try:
+        grade = int(grade)
+    except ValueError:
+        flash("Virhe: vääränlainen arvosana")
+        return redirect(f"/p/{program_id}")
+
+    if grade < 1 or grade > 5:
+        flash("Virhe: vääränlainen arvosana")
+        return redirect(f"/p/{program_id}")
+
+    try:
+        db.execute("INSERT INTO reviews (author, program, grade, comment) VALUES (?, ?, ?, ?)", [session["user_id"], program_id, grade, comment])
+    except sqlite3.IntegrityError:
+        pass
+
+    return redirect(f"/p/{program_id}")
 
 @app.template_filter()
 def show_lines(content):

@@ -12,3 +12,12 @@ CREATE TABLE programs (
     download_link TEXT,
     description TEXT
 );
+
+CREATE TABLE reviews (
+    id INTEGER PRIMARY KEY,
+    author INTEGER REFERENCES users,
+    program INTEGER REFERENCES programs,
+    grade INTEGER,
+    comment TEXT,
+    UNIQUE(author, program) ON CONFLICT ABORT
+);

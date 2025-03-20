@@ -22,4 +22,33 @@
 </form>
 {% endif %}
 
+{% if can_review %}
+<p>Anna arvostelu:</p>
+
+<form action="/p/{{ program_id }}/review" method="post">
+  <select name="grade">
+    <option value="">Ei arvosanaa</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+  </select>
+
+  <br/>
+
+  <textarea type="text" name="comment" placeholder="Kommentti" rows=10 cols=40></textarea>
+
+  <br/>
+
+  <input type="submit" value="Lähetä"></input>
+</form>
+{% endif %}
+
+{% for review in reviews %}
+<p>Arvosana: {{ review.grade }}</p>
+<p>{{ review.comment | show_lines }}</p>
+<p>- {{ review.username }}</p>
+{% endfor %}
+
 {% endblock %}
