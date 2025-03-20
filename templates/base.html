@@ -5,8 +5,28 @@
   </head>
   <body>
     <h1>SovellusHub</h1>
+    {% if session.username %}
+    <p>{{ session.username }}</p>
+
+    <form action="/logout" method="post">
+      <button type="submit" value="logout">Kirjaudu ulos</button>
+    </form>
+    {% else %}
     <a href="/login">Kirjaudu sisään</a>
     <a href="/register">Rekisteröidy</a>
+    {% endif %}
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <center>
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+      </center>
+      {% endif %}
+    {% endwith %}
+
+    <hr>
 
     {% block content %}{% endblock %}
   </body>
