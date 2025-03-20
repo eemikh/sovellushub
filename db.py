@@ -19,14 +19,26 @@ class Database:
 
     def execute(self, query, params=[]):
         conn = self._connection()
-        result = conn.execute(query, params)
+
+        try:
+            result = conn.execute(query, params)
+        except Exception as e:
+            conn.close()
+            raise e
+
         conn.commit()
         conn.close()
         return result.lastrowid
 
     def query(self, query, params=[]):
         conn = self._connection()
-        result = conn.execute(query, params).fetchall()
+
+        try:
+            result = conn.execute(query, params).fetchall()
+        except Exception as e:
+            conn.close()
+            raise e
+
         conn.close()
         return result
 
