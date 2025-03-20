@@ -6,4 +6,13 @@
 <a href="/create">Lisää sovellus</a>
 {% endif %}
 
+{% for program in programs %}
+
+<h2><a href="/p/{{ program.id }}">{{ program.name }}</a></h2>
+
+<p>{{ program.author_name }}</p>
+<p>{{ program.description }}</p>
+
+{% endfor %}
+
 {% endblock %}

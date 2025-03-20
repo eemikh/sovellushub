@@ -7,11 +7,15 @@ from db import Database
 
 app = Flask(__name__)
 app.secret_key = "2d0428696ca1cfc52c25ab54228c171f"
-db = Database("database.db", reset=True)
+db = Database("database.db")
 
 @app.route("/")
 def index():
-    return render_template("index.html", message="Hei maailma!")
+    # TODO: pagination
+    programs = db.query("SELECT p.id, p.name, p.description, u.username FROM programs p, users u where u.id = p.author order by p.id desc")
+    programs = [{"id": p[0], "name": p[1], "description": p[2], "author_name": p[3]} for p in programs]
+
+    return render_template("index.html", programs=programs)
 
 @app.route("/login")
 def login_page():
@@ -83,7 +87,16 @@ def create():
     download_link = request.form["download_link"]
     description = request.form["description"]
 
-    db.execute("INSERT INTO programs (author, name, source_link, download_link, description) VALUES (?, ?, ?, ?, ?)", [session["user_id"], name, source_link, download_link, description])
+    program_id = db.execute("INSERT INTO programs (author, name, source_link, download_link, description) VALUES (?, ?, ?, ?, ?)", [session["user_id"], name, source_link, download_link, description])
 
-    return redirect("/")
+    return redirect(f"/p/{program_id}")
 
+@app.route("/p/<int:program_id>")
+def program_page(program_id):
+    try:
+        name, author_name, source_link, download_link, description = db.query("SELECT p.name, u.username, p.source_link, p.download_link, p.description FROM programs p, users u WHERE p.author = u.id and p.id = ?", [program_id])[0]
+    except IndexError:
+        flash("Sovellusta ei löytynyt")
+        return redirect("/", 404)
+
+    return render_template("program.html", name=name, author_name=author_name, source_link=source_link, download_link=download_link, description=description)

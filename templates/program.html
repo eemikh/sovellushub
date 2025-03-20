@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>{{ name }}</h2>
+
+<p>{{ author_name }}</p>
+
+<p><a href="{{ source_link }}" target="_blank">{{ source_link }}</a></p>
+
+<p><a href="{{ download_link }}" target="_blank">{{ download_link }}</a></p>
+
+<p>{{ description }}</p>
+
+{% endblock %}
