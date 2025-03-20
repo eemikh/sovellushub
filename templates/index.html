@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-<p>
-  <i>{{ message }}</i>
-</p>
+
+{% if session.username %}
+<a href="/create">Lisää sovellus</a>
+{% endif %}
+
 {% endblock %}

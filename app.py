@@ -66,3 +66,8 @@ def logout():
     del session["username"]
     flash("Kirjauduttu ulos")
     return redirect("/")
+
+
+@app.route("/create")
+def create_page():
+    return render_template("create.html")
