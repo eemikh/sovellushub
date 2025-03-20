@@ -1,4 +1,5 @@
 import sqlite3
+import markupsafe
 
 from flask import Flask, flash, redirect, render_template, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -146,3 +147,9 @@ def delete_program(program_id):
     db.execute("DELETE FROM programs WHERE id = ? AND author = ?", [program_id, session["user_id"]])
 
     return redirect ("/")
+
+@app.template_filter()
+def show_lines(content):
+    content = str(markupsafe.escape(content))
+    content = content.replace("\n", "<br />")
+    return markupsafe.Markup(content)

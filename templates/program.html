@@ -10,7 +10,7 @@
 
 <p><a href="{{ download_link }}" target="_blank">{{ download_link }}</a></p>
 
-<p>{{ description }}</p>
+<p>{{ description | show_lines }}</p>
 
 {% if session.user_id == author_id %}
 <form action="/p/{{ program_id }}/edit">
