@@ -26,7 +26,7 @@ class Database:
 
     def query(self, query, params=[]):
         conn = self._connection()
-        result = conn.execute(query, params)
+        result = conn.execute(query, params).fetchall()
         conn.close()
         return result
 

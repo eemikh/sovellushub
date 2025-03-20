@@ -1,13 +1,7 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Etusivu</title>
-  </head>
+{% extends "base.html" %}
 
-  <body>
-    <h1>Etusivu</h1>
-    <p>
-      <i>{{ message }}</i>
-    </p>
-  </body>
-</html>
+{% block content %}
+<p>
+  <i>{{ message }}</i>
+</p>
+{% endblock %}
