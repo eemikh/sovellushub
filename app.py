@@ -21,16 +21,17 @@ def login_page():
 def login():
     username = request.form["username"]
     password = request.form["password"]
-    queryres = db.query("SELECT password FROM users WHERE username = ?", [username])
+    queryres = db.query("SELECT id, password FROM users WHERE username = ?", [username])
 
     if len(queryres) == 0:
         flash("Virhe: käyttäjää ei löytynyt")
         return redirect("/login")
 
-    hash = queryres[0][0]
+    user_id, hash = queryres[0]
 
     if check_password_hash(hash, password):
         session["username"] = username
+        session["user_id"] = user_id
         return redirect("/")
     else:
         flash("Virhe: väärä tunnus tai salasana")
@@ -64,10 +65,25 @@ def register():
 @app.route("/logout", methods=["POST"])
 def logout():
     del session["username"]
+    del session["user_id"]
     flash("Kirjauduttu ulos")
     return redirect("/")
-
 
 @app.route("/create")
 def create_page():
     return render_template("create.html")
+
+@app.route("/create", methods=["POST"])
+def create():
+    if "username" not in session:
+        return redirect("/", code=403)
+
+    name = request.form["name"]
+    source_link = request.form["source_link"]
+    download_link = request.form["download_link"]
+    description = request.form["description"]
+
+    db.execute("INSERT INTO programs (author, name, source_link, download_link, description) VALUES (?, ?, ?, ?, ?)", [session["user_id"], name, source_link, download_link, description])
+
+    return redirect("/")
+
