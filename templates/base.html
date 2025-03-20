@@ -16,6 +16,12 @@
     <a href="/register">Rekisteröidy</a>
     {% endif %}
 
+    <form action="/search" method="get">
+      <input type="text" name="text" placeholder="Hakusana"></input>
+
+      <input type="submit" value="Hae"></input>
+    </form>
+
     {% with messages = get_flashed_messages() %}
       {% if messages %}
       <center>

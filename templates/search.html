@@ -2,14 +2,8 @@
 
 {% block content %}
 
-{% if session.username %}
-<a href="/create">Lisää sovellus</a>
-{% endif %}
-
 {% for program in programs %}
-
 {% include "programcard.html" %}
-
 {% endfor %}
 
 {% endblock %}

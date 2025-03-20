@@ -17,6 +17,19 @@ def index():
 
     return render_template("index.html", programs=programs)
 
+@app.route("/search")
+def search():
+    if "text" not in request.args:
+        return redirect("/")
+
+    searchtext = request.args["text"]
+
+    # TODO: pagination
+    programs = db.query("SELECT p.id, p.name, p.description, u.username FROM programs p, users u where u.id = p.author and (p.name like ? or p.description like ?) order by p.id desc", ["%" + searchtext + "%", "%" + searchtext + "%"])
+    programs = [{"id": p[0], "name": p[1], "description": p[2], "author_name": p[3]} for p in programs]
+
+    return render_template("search.html", programs=programs)
+
 @app.route("/login")
 def login_page():
     return render_template("login.html")
