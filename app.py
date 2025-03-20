@@ -171,7 +171,7 @@ def review(program_id):
     try:
         db.execute("INSERT INTO reviews (author, program, grade, comment) VALUES (?, ?, ?, ?)", [session["user_id"], program_id, grade, comment])
     except sqlite3.IntegrityError:
-        pass
+        flash("Virhe: olet jo lisännyt arvostelun")
 
     return redirect(f"/p/{program_id}")
 
