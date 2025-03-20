@@ -60,3 +60,9 @@ def register():
 
     flash("Tunnus luotu")
     return redirect("/")
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    del session["username"]
+    flash("Kirjauduttu ulos")
+    return redirect("/")
