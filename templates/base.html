@@ -9,6 +9,7 @@
     <a href="/u/{{ session.user_id }}">{{ session.username }}</a>
 
     <form action="/logout" method="post">
+      <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}"></input>
       <button type="submit" value="logout">Kirjaudu ulos</button>
     </form>
     {% else %}

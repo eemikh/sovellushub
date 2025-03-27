@@ -1,7 +1,8 @@
+import secrets
 import sqlite3
-import markupsafe
 
-from flask import Flask, flash, redirect, render_template, request, session
+import markupsafe
+from flask import Flask, abort, flash, redirect, render_template, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from db import Database
@@ -50,6 +51,7 @@ def login():
     if check_password_hash(hash, password):
         session["username"] = username
         session["user_id"] = user_id
+        session["csrf_token"] = secrets.token_hex(16)
         return redirect("/")
     else:
         flash("Virhe: väärä tunnus tai salasana")
@@ -82,6 +84,8 @@ def register():
 
 @app.route("/logout", methods=["POST"])
 def logout():
+    check_csrf()
+
     del session["username"]
     del session["user_id"]
     flash("Kirjauduttu ulos")
@@ -93,6 +97,8 @@ def create_page():
 
 @app.route("/create", methods=["POST"])
 def create():
+    check_csrf()
+    
     if "username" not in session:
         return redirect("/", code=403)
 
@@ -132,6 +138,8 @@ def program_edit_page(program_id):
 
 @app.route("/p/<int:program_id>/edit", methods=["POST"])
 def program_edit(program_id):
+    check_csrf()
+    
     if "username" not in session:
         return redirect("/", code=403)
 
@@ -146,6 +154,8 @@ def program_edit(program_id):
 
 @app.route("/p/<int:program_id>/delete", methods=["POST"])
 def delete_program(program_id):
+    check_csrf()
+
     if "user_id" not in session:
         return redirect("/", 404)
 
@@ -155,6 +165,8 @@ def delete_program(program_id):
 
 @app.route("/p/<int:program_id>/review", methods=["POST"])
 def review(program_id):
+    check_csrf()
+
     grade = request.form["grade"]
     comment = request.form["comment"]
 
@@ -198,3 +210,7 @@ def show_lines(content):
     content = str(markupsafe.escape(content))
     content = content.replace("\n", "<br />")
     return markupsafe.Markup(content)
+
+def check_csrf():
+    if "csrf_token" not in session or request.form["csrf_token"] != session["csrf_token"]:
+        abort(403)

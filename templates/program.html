@@ -21,6 +21,7 @@
 
 <form action="/p/{{ program_id }}/delete" method="post">
   <input type="submit" value="Poista sovellus"></input>
+  <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}"></input>
 </form>
 {% endif %}
 
@@ -42,6 +43,8 @@
   <textarea type="text" name="comment" placeholder="Kommentti" rows=10 cols=40></textarea>
 
   <br/>
+
+  <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}"></input>
 
   <input type="submit" value="Lähetä"></input>
 </form>
