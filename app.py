@@ -13,8 +13,8 @@ db = Database("database.db")
 @app.route("/")
 def index():
     # TODO: pagination
-    programs = db.query("SELECT p.id, p.name, p.description, u.username, IFNULL(AVG(r.grade), 0) FROM programs p, users u LEFT JOIN reviews r ON r.program = p.id WHERE u.id = p.author GROUP BY p.id ORDER BY p.id DESC")
-    programs = [{"id": p[0], "name": p[1], "description": p[2], "author_name": p[3], "grade": p[4]} for p in programs]
+    programs = db.query("SELECT p.id, p.name, p.description, u.username, u.id, IFNULL(AVG(r.grade), 0) FROM programs p, users u LEFT JOIN reviews r ON r.program = p.id WHERE u.id = p.author GROUP BY p.id ORDER BY p.id DESC")
+    programs = [{"id": p[0], "name": p[1], "description": p[2], "author_name": p[3], "author_id": p[4], "grade": p[5]} for p in programs]
 
     return render_template("index.html", programs=programs)
 
@@ -26,8 +26,8 @@ def search():
     searchtext = request.args["text"]
 
     # TODO: pagination
-    programs = db.query("SELECT p.id, p.name, p.description, u.username, IFNULL(AVG(r.grade), 0) FROM programs p, users u LEFT JOIN reviews r ON r.program = p.id WHERE u.id = p.author AND (p.name LIKE ? OR p.description LIKE ?) GROUP BY p.id ORDER BY p.id DESC", ["%" + searchtext + "%", "%" + searchtext + "%"])
-    programs = [{"id": p[0], "name": p[1], "description": p[2], "author_name": p[3], "grade": p[4]} for p in programs]
+    programs = db.query("SELECT p.id, p.name, p.description, u.username, u.id, IFNULL(AVG(r.grade), 0) FROM programs p, users u LEFT JOIN reviews r ON r.program = p.id WHERE u.id = p.author AND (p.name LIKE ? OR p.description LIKE ?) GROUP BY p.id ORDER BY p.id DESC", ["%" + searchtext + "%", "%" + searchtext + "%"])
+    programs = [{"id": p[0], "name": p[1], "description": p[2], "author_name": p[3], "author_id": p[4], "grade": p[5]} for p in programs]
 
     return render_template("search.html", programs=programs)
 
@@ -113,8 +113,8 @@ def program_page(program_id):
         flash("Sovellusta ei löytynyt")
         return redirect("/", 404)
 
-    reviews = db.query("SELECT r.grade, r.comment, u.username FROM users u, programs p LEFT JOIN reviews r ON r.program = p.id WHERE u.id = r.author AND p.id = ?", [program_id])
-    reviews = [{"grade": r[0], "comment": r[1], "username": r[2]} for r in reviews]
+    reviews = db.query("SELECT r.grade, r.comment, u.username, u.id FROM users u, programs p LEFT JOIN reviews r ON r.program = p.id WHERE u.id = r.author AND p.id = ?", [program_id])
+    reviews = [{"grade": r[0], "comment": r[1], "username": r[2], "user_id": r[3]} for r in reviews]
 
     can_review = "user_id" in session
 
@@ -174,6 +174,24 @@ def review(program_id):
         flash("Virhe: olet jo lisännyt arvostelun")
 
     return redirect(f"/p/{program_id}")
+
+@app.route("/u/<int:user_id>")
+def user_page(user_id):
+    try:
+        average_given_review, review_count = db.query("SELECT IFNULL(AVG(r.grade), 0), COUNT(r.id) FROM users u LEFT JOIN reviews r ON r.author = u.id WHERE u.id = ?", [user_id])[0]
+
+        data = db.query("SELECT u.id, u.username, p.id, p.name, p.description, IFNULL(AVG(r.grade), 0) FROM users u LEFT JOIN programs p ON p.author = u.id LEFT JOIN reviews r ON r.program = p.id WHERE u.id = ? GROUP BY p.id ORDER BY p.id ASC", [user_id])
+
+        user_id = data[0][0]
+        name = data[0][1]
+    except IndexError:
+        flash("Käyttäjää ei löytynyt")
+        return redirect("/", 404)
+
+    programs = [{"name": d[3], "description": d[4], "grade": d[5], "id": d[2], "author_name": name, "author_id": user_id} for d in data]
+    average_grade = sum([program["grade"] for program in programs])/len(programs)
+
+    return render_template("user.html", name=name, programs=programs, average_given_review=average_given_review, review_count=review_count, average_grade=average_grade)
 
 @app.template_filter()
 def show_lines(content):

@@ -6,7 +6,7 @@
   <body>
     <h1><a href="/">SovellusHub</a></h1>
     {% if session.username %}
-    <p>{{ session.username }}</p>
+    <a href="/u/{{ session.user_id }}">{{ session.username }}</a>
 
     <form action="/logout" method="post">
       <button type="submit" value="logout">Kirjaudu ulos</button>

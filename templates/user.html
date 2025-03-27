@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>{{ name }}</h2>
+
+<p>Annettujen arvosteluiden keskiarvo: {{ average_given_review }}</p>
+
+<p>Annettujen arvosteluiden määrä: {{ review_count }}</p>
+
+<p>Ohjelmien määrä: {{ programs|length }}</p>
+
+<p>Ohjelmien arvosteluiden keskiarvo: {{ average_grade }}</p>
+
+<hr>
+
+{% for program in programs %}
+{% include "programcard.html" %}
+{% endfor %}
+
+{% endblock %}

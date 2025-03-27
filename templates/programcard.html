@@ -1,6 +1,6 @@
 <h2><a href="/p/{{ program.id }}">{{ program.name }}</a></h2>
 
 <p>Arvosana {{ program.grade }}</p>
-<p>{{ program.author_name }}</p>
+<a href="/u/{{ program.author_id }}">{{ program.author_name }}</a>
 <p>{{ program.description | show_lines }}</p>
 

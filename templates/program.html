@@ -6,7 +6,7 @@
 
 <p>Arvosana: {{ grade }}</p>
 
-<p>{{ author_name }}</p>
+<p><a href="/u/{{ author_id }}">{{ author_name }}</a></p>
 
 <p><a href="{{ source_link }}" target="_blank">{{ source_link }}</a></p>
 
@@ -50,7 +50,7 @@
 {% for review in reviews %}
 <p>Arvosana: {{ review.grade }}</p>
 <p>{{ review.comment | show_lines }}</p>
-<p>- {{ review.username }}</p>
+<p>- <a href="/u/{{ review.user_id }}">{{ review.username }}</a></p>
 {% endfor %}
 
 {% endblock %}
