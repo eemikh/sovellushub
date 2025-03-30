@@ -2,19 +2,20 @@
 <html>
   <head>
     <title>SovellusHub</title>
+    <link rel="stylesheet" href="/static/main.css" />
   </head>
   <body>
-    <h1><a href="/">SovellusHub</a></h1>
+    <h1><a href="/" class="internallink">SovellusHub</a></h1>
     {% if session.username %}
-    <a href="/u/{{ session.user_id }}">{{ session.username }}</a>
+    <a href="/u/{{ session.user_id }}" class="internallink">{{ session.username }}</a>
 
     <form action="/logout" method="post">
       <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}"></input>
       <button type="submit" value="logout">Kirjaudu ulos</button>
     </form>
     {% else %}
-    <a href="/login">Kirjaudu sisään</a>
-    <a href="/register">Rekisteröidy</a>
+    <a href="/login" class="button">Kirjaudu sisään</a>
+    <a href="/register" class="button">Rekisteröidy</a>
     {% endif %}
 
     <form action="/search" method="get">
@@ -35,6 +36,8 @@
 
     <hr>
 
-    {% block content %}{% endblock %}
+    <div id="content">
+      {% block content %}{% endblock %}
+    </div>
   </body>
 </html>

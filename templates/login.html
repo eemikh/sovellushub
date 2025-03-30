@@ -1,15 +1,17 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form action="/login" method="post">
-  <p>
-    Käyttäjänimi: <br/>
-    <input type="text" name="username" required />
-  </p>
-  <p>
-    Salasana: <br/>
-    <input type="password" name="password" required />
-  </p>
-  <input type="submit" value="Kirjaudu sisään" />
-</form>
+<div style="display: flex; align-item: center; justify-content: center">
+  <form action="/login" method="post">
+    <p>
+      Käyttäjänimi: <br/>
+      <input type="text" name="username" required />
+    </p>
+    <p>
+      Salasana: <br/>
+      <input type="password" name="password" required />
+    </p>
+    <input type="submit" value="Kirjaudu sisään" />
+  </form>
+</div>
 {% endblock %}

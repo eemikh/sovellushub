@@ -50,6 +50,11 @@
 </form>
 {% endif %}
 
+
+<hr>
+
+<h2>Arvostelut</h2>
+
 {% for review in reviews %}
 <p>Arvosana: {{ review.grade }}</p>
 <p>{{ review.comment | show_lines }}</p>

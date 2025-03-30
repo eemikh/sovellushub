@@ -208,7 +208,13 @@ def user_page(user_id):
 @app.template_filter()
 def show_lines(content):
     content = str(markupsafe.escape(content))
-    content = content.replace("\n", "<br />")
+    content = content.replace("\r", "")
+
+    while "\n\n" in content:
+        content = content.replace("\n\n", "\n")
+
+    content = content.replace("\n", "</p><p>")
+    content = "<p>" + content + "</p>"
     return markupsafe.Markup(content)
 
 def check_csrf():

@@ -1,6 +1,13 @@
-<h2><a href="/p/{{ program.id }}">{{ program.name }}</a></h2>
+<div class="programcard">
+  <h2><a href="/p/{{ program.id }}" class="internallink">{{ program.name }}</a></h2>
 
-<p>Arvosana {{ program.grade }}</p>
-<a href="/u/{{ program.author_id }}">{{ program.author_name }}</a>
-<p>{{ program.description | show_lines }}</p>
+  <div style="margin-top: -13px">
+    <a href="/u/{{ program.author_id }}" class="internallink" style="display: inline-block">{{ program.author_name }}</a>
+    <div style="display: inline-block; float: right; margin-right: 5px">Arvosana {{ program.grade }}</div>
+  </div>
+
+  <hr>
+
+  <div style="<!-- text-indent: 30px; border-left: solid 5px lightgray -->">{{ program.description | show_lines }}</div>
+</div>
 

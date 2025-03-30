@@ -1,0 +1,54 @@
+body {
+  background-color: #f9f9f9;
+  font-family: "Noto Sans", "Helvetica", sans-serif;
+}
+
+#content {
+  width: 1000px;
+  padding: 10px;
+  margin: auto;
+}
+
+.programcard {
+  margin-bottom: 50px;
+}
+
+.internallink {
+  text-decoration: none;
+  outline-color: transparent;
+}
+
+.internallink:link,
+.internallink:visited,
+.internallink:focus,
+.internallink:hover,
+.internallink:active {
+  color: blue;
+}
+
+button,
+.button,
+input[type=submit] {
+  text-decoration: none;
+  outline-color: transparent;
+  color: black;
+  background-color: #ccc;
+  border: none;
+  padding: 5px;
+}
+
+button:hover,
+.button:hover,
+input[type=submit]:hover {
+  background-color: #aaa;
+  cursor: pointer;
+}
+
+input,
+textarea {
+  border: none;
+  background-color: #f0f0f4;
+  border: solid 1px;
+  padding: 6px;
+  border-radius: 3px;
+}
