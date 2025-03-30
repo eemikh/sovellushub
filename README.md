@@ -14,3 +14,20 @@ Linux, verkkosivu, tms.
 Sivustolla voi hakea sovelluksia nimen ja kuvauksen perusteella.
 Käyttäjäsivulta näkee käyttäjän jakamat sovellukset ja niiden määrän.
 
+## Välipalautus 2
+
+Sivustolla toimivat kaikki yllä kuvatut ominaisuudet paitsi luokkien määrittäminen sovellukselle.
+Koodia on tehty funktionaalisuus tärkeimpänä prioriteettina, ja luokkien lisäämisen jälkeen koodin
+parannus ja verkkosivun parempi tyylittely ja käytettävyys on seuraava vaihe.
+Myös voisi olla järkevää mahdollistaa arvostelujen muokkaaminen.
+
+## Ajaminen
+
+Komennolla
+
+```
+flask run
+```
+
+käynnistetään Flaskin devausympäristö, jossa verkkosivua voi kokeilla.
+Oletuksena tietokanta luodaan automaattisesti tiedostoon `database.db`, jos sitä ei ole jo olemassa.
