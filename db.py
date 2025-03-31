@@ -11,11 +11,17 @@ class Database:
             except FileNotFoundError:
                 pass
 
-            conn = self._connection()
+        conn = self._connection()
 
-            f = open("schema.sql", "r")
-            schema = f.read()
+        f = open("schema.sql", "r")
+        schema = f.read()
+
+        try:
             conn.executescript(schema)
+        except sqlite3.OperationalError:
+            pass
+
+        conn.close()
 
     def execute(self, query, params=[]):
         conn = self._connection()
