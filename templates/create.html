@@ -11,6 +11,18 @@
   <label for="download_link">Linkki sovelluksen lataukseen:</label> <br/>
   <input type="text" id="download_link" name="download_link" size="40" required /> <br/>
 
+  {% for class in classes %}
+  <label for="class{{ class.id }}">{{ class.name }}:</label> <br/>
+
+  <select name="class{{ class.id}}">
+    {% for value in class.options %}
+    <option value="{{ value[1] }}">{{ value[0] }}</option>
+    {% endfor %}
+  </select>
+
+  <br/>
+  {% endfor %}
+
   <label for="description">Sovelluksen kuvaus:</label> <br/>
   <textarea id="description" name="description" rows=10 cols=80 placeholder="Kuvaus siitä, mitä sovellus tekee" required></textarea> <br/>
 

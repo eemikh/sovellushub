@@ -93,7 +93,21 @@ def logout():
 
 @app.route("/create")
 def create_page():
-    return render_template("create.html")
+    res = db.query("SELECT c.name, v.value, v.id, c.id FROM classes c, class_value v WHERE v.class = c.id ORDER BY c.name, v.value")
+
+    classes = {}
+    for class_value in res:
+        # (class_name, class_id)
+        id = (class_value[0], class_value[3])
+
+        if id not in classes:
+            classes[id] = []
+
+        classes[id].append((class_value[1], class_value[2]))
+
+    classes = [{"name": x[0][0], "id": x[0][1], "options": x[1]} for x in classes.items()]
+
+    return render_template("create.html", classes=classes)
 
 @app.route("/create", methods=["POST"])
 def create():
@@ -107,7 +121,16 @@ def create():
     download_link = request.form["download_link"]
     description = request.form["description"]
 
+    all_classes = db.query("SELECT c.id FROM classes c")
+
+    values = []
+    for (clas,) in all_classes:
+        values.append(request.form[f"class{clas}"])
+
     program_id = db.execute("INSERT INTO programs (author, name, source_link, download_link, description) VALUES (?, ?, ?, ?, ?)", [session["user_id"], name, source_link, download_link, description])
+
+    for value in values:
+        db.execute("INSERT INTO program_class_value (program, value) VALUES (?, ?)", [program_id, value])
 
     return redirect(f"/p/{program_id}")
 
@@ -124,7 +147,9 @@ def program_page(program_id):
 
     can_review = "user_id" in session
 
-    return render_template("program.html", name=name, author_name=author_name, author_id=author_id, source_link=source_link, download_link=download_link, description=description, program_id=program_id, can_review=can_review, reviews=reviews, grade=grade)
+    classes = db.query("SELECT c.name, cv.value FROM program_class_value pcv, class_value cv, classes c WHERE pcv.program = ? AND pcv.value = cv.id AND c.id = cv.class ORDER BY c.name, cv.value", [program_id])
+
+    return render_template("program.html", name=name, author_name=author_name, author_id=author_id, source_link=source_link, download_link=download_link, description=description, program_id=program_id, can_review=can_review, reviews=reviews, grade=grade, classes=classes)
 
 @app.route("/p/<int:program_id>/edit")
 def program_edit_page(program_id):
@@ -160,6 +185,7 @@ def delete_program(program_id):
         return redirect("/", 404)
 
     db.execute("DELETE FROM programs WHERE id = ? AND author = ?", [program_id, session["user_id"]])
+    db.execute("DELETE FROM program_class_value WHERE program = ?", [program_id])
 
     return redirect ("/")
 

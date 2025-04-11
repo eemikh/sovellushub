@@ -1,0 +1,23 @@
+INSERT OR IGNORE INTO classes (name) VALUES ('Ohjelmointikieli');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Ohjelmointikieli'), 'Python');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Ohjelmointikieli'), 'C');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Ohjelmointikieli'), 'C++');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Ohjelmointikieli'), 'Rust');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Ohjelmointikieli'), 'JavaScript');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Ohjelmointikieli'), 'TypeScript');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Ohjelmointikieli'), 'Haskell');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Ohjelmointikieli'), 'Go');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Ohjelmointikieli'), 'Assembly');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Ohjelmointikieli'), 'GDScript');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Ohjelmointikieli'), 'Java');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Ohjelmointikieli'), 'Kotlin');
+
+INSERT OR IGNORE INTO classes (name) VALUES ('Alusta');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Alusta'), 'Web');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Alusta'), 'Android');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Alusta'), 'iOS');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Alusta'), 'Linux');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Alusta'), 'BSD');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Alusta'), 'macOS');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Alusta'), 'Windows');
+INSERT OR IGNORE INTO class_value (class, value) VALUES ((SELECT id FROM classes WHERE name = 'Alusta'), 'ReactOS');

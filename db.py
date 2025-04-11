@@ -21,6 +21,11 @@ class Database:
         except sqlite3.OperationalError:
             pass
 
+        f = open("init.sql", "r")
+        initscript = f.read()
+
+        conn.executescript(initscript)
+
         conn.close()
 
     def execute(self, query, params=[]):

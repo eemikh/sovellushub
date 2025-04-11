@@ -12,6 +12,10 @@
 
 <p><a href="{{ download_link }}" target="_blank">{{ download_link }}</a></p>
 
+{% for class in classes %}
+<p>{{ class[0] }}: {{ class[1] }}</p>
+{% endfor %}
+
 <p>{{ description | show_lines }}</p>
 
 {% if session.user_id == author_id %}

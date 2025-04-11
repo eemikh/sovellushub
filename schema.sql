@@ -21,3 +21,20 @@ CREATE TABLE reviews (
     comment TEXT,
     UNIQUE(author, program) ON CONFLICT ABORT
 );
+
+CREATE TABLE classes (
+    id INTEGER PRIMARY KEY,
+    name TEXT UNIQUE
+);
+
+CREATE TABLE class_value (
+    id INTEGER PRIMARY KEY,
+    class INTEGER REFERENCES classes,
+    value TEXT,
+    UNIQUE(class, value) ON CONFLICT ABORT
+);
+
+CREATE TABLE program_class_value (
+    program INTEGER REFERENCES programs,
+    value INTEGER REFERENCES class_value
+);
