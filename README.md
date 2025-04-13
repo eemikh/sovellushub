@@ -21,6 +21,14 @@ Koodia on tehty funktionaalisuus tärkeimpänä prioriteettina, ja luokkien lis�
 parannus ja verkkosivun parempi tyylittely ja käytettävyys on seuraava vaihe.
 Myös voisi olla järkevää mahdollistaa arvostelujen muokkaaminen.
 
+## Välipalautus 3
+
+Kaikki välipalautuksen 2 kommentit yllä vielä pätevät, paitsi nyt kaikki ominaisuudet toimivat, myös
+luokkien määrittäminen.
+Käytettävyyttä parantavia ominaisuuksia, kuten arvosteluiden muokkaaminen ja sovelluksen luokkien
+muokkaaminen, olisi hyvä lisätä.
+Myös koodin laatua ja tyyliohjeiden noudattavuutta olisi syytä parantaa ennen viimeistä palautusta.
+
 ## Ajaminen
 
 Komennolla
