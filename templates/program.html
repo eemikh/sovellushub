@@ -2,32 +2,49 @@
 
 {% block content %}
 
-<h2>{{ name }}</h2>
+<div style="display: flex; align-items: center;">
+  <h1>{{ name }}</h1>
 
-<p>Arvosana: {{ grade }}</p>
+  {% if session.user_id == author_id %}
+  <div style="flex-grow: 1"></div>
+
+  <form action="/p/{{ program_id }}/edit" style="margin-right: 10px;">
+    <input type="submit" value="Muokkaa sovellusta"></input>
+  </form>
+
+  <form action="/p/{{ program_id }}/delete" method="post">
+    <input type="submit" value="Poista sovellus"></input>
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}"></input>
+  </form>
+  {% endif %}
+</div>
+
+<h2 style="margin-top: 0px;">{{ grade }}/5</h2>
 
 <p><a href="/u/{{ author_id }}">{{ author_name }}</a></p>
 
-<p><a href="{{ source_link }}" target="_blank">{{ source_link }}</a></p>
+<div style="display: flex; border: 1px solid; border-radius: 4px; padding: 5px;">
+  {% for class in classes %}
+  <div style="flex-grow: 1">
+    <p><b>{{ class[0] }}</b></p>
+    <p>{{ class[1] }}</p>
+  </div>
+  {% endfor %}
 
-<p><a href="{{ download_link }}" target="_blank">{{ download_link }}</a></p>
+  <div style="flex-grow: 1">
+    <p><b>Lähdekoodi</b></p>
+    <p><a href="{{ source_link }}" target="_blank">{{ source_link }}</a></p>
+  </div>
 
-{% for class in classes %}
-<p>{{ class[0] }}: {{ class[1] }}</p>
-{% endfor %}
+  <div style="flex-grow: 1">
+    <p><b>Lataus</b></p>
+    <p><a href="{{ download_link }}" target="_blank">{{ download_link }}</a></p>
+  </div>
+</div>
 
 <p>{{ description | show_lines }}</p>
 
-{% if session.user_id == author_id %}
-<form action="/p/{{ program_id }}/edit">
-  <input type="submit" value="Muokkaa sovellusta"></input>
-</form>
-
-<form action="/p/{{ program_id }}/delete" method="post">
-  <input type="submit" value="Poista sovellus"></input>
-  <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}"></input>
-</form>
-{% endif %}
+<hr>
 
 {% if can_review %}
 <p>Anna arvostelu:</p>
@@ -54,15 +71,15 @@
 </form>
 {% endif %}
 
-
-<hr>
-
 <h2>Arvostelut</h2>
 
 {% for review in reviews %}
-<p>Arvosana: {{ review.grade }}</p>
-<p>{{ review.comment | show_lines }}</p>
-<p>- <a href="/u/{{ review.user_id }}">{{ review.username }}</a></p>
+<div style="border: 1px solid; border-radius: 5px; padding: 10px;">
+  <h2>{{ review.grade }}/5</h2>
+  <p><a href="/u/{{ review.user_id }}">{{ review.username }}</a></p>
+  <hr>
+  <p>{{ review.comment | show_lines }}</p>
+</div>
 {% endfor %}
 
 {% endblock %}
