@@ -13,8 +13,8 @@
   </form>
 
   <form action="/p/{{ program_id }}/delete" method="post">
-    <input type="submit" value="Poista sovellus"></input>
     <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}"></input>
+    <input type="submit" value="Poista sovellus"></input>
   </form>
   {% endif %}
 </div>
@@ -50,7 +50,8 @@
 <p>Anna arvostelu:</p>
 
 <form action="/p/{{ program_id }}/review" method="post">
-  <select name="grade">
+  <label for="grade">Arvosana:</label>
+  <select id="grade" name="grade">
     <option value="">Ei arvosanaa</option>
     <option value="1">1</option>
     <option value="2">2</option>
@@ -61,7 +62,8 @@
 
   <br/>
 
-  <textarea type="text" name="comment" placeholder="Kommentti" rows=10 cols=40></textarea>
+  <label for="comment">Kommentti:</label> <br/>
+  <textarea id="comment" type="text" name="comment" placeholder="Kommentti" rows=10 cols=40></textarea>
 
   <br/>
 

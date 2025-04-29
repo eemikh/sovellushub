@@ -4,12 +4,12 @@
 <div style="display: flex; align-item: center; justify-content: center">
   <form action="/login" method="post">
     <p>
-      Käyttäjänimi: <br/>
-      <input type="text" name="username" required />
+      <label for="username">Käyttäjänimi:</label> <br/>
+      <input id="username" type="text" name="username" required />
     </p>
     <p>
-      Salasana: <br/>
-      <input type="password" name="password" required />
+      <label for="password">Salasana:</label> <br/>
+      <input id="password" type="password" name="password" required />
     </p>
     <input type="submit" value="Kirjaudu sisään" />
   </form>
