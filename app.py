@@ -53,7 +53,7 @@ def search():
 
 @app.route("/login")
 def login_page():
-    return render_template("login.html")
+    return render_template("login.html", username="")
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -62,8 +62,8 @@ def login():
     queryres = db.query("SELECT id, password FROM users WHERE username = ?", [username])
 
     if len(queryres) == 0:
-        flash("Virhe: käyttäjää ei löytynyt")
-        return redirect("/login")
+        flash("Virhe: väärä tunnus tai salasana")
+        return render_template("login.html", username=username)
 
     user_id, hash = queryres[0]
 
@@ -74,11 +74,11 @@ def login():
         return redirect("/")
     else:
         flash("Virhe: väärä tunnus tai salasana")
-        return redirect("/login")
+        return render_template("login.html", username=username)
 
 @app.route("/register")
 def register_page():
-    return render_template("register.html")
+    return render_template("register.html", username="")
 
 @app.route("/register", methods=["POST"])
 def register():
@@ -88,7 +88,7 @@ def register():
 
     if password1 != password2:
         flash("Virhe: salasanat eivät ole samat")
-        return redirect("/register")
+        return render_template("register.html", username=username)
 
     hash = generate_password_hash(password1)
 
@@ -99,7 +99,7 @@ def register():
         return redirect("/register")
 
     flash("Tunnus luotu")
-    return redirect("/")
+    return redirect("/login")
 
 @app.route("/logout", methods=["POST"])
 @csrf_required
