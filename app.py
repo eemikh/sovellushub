@@ -1,3 +1,4 @@
+from functools import wraps
 import secrets
 import sqlite3
 
@@ -10,6 +11,24 @@ from db import Database
 app = Flask(__name__)
 app.secret_key = "2d0428696ca1cfc52c25ab54228c171f"
 db = Database("database.db")
+
+def csrf_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "csrf_token" not in session or request.form["csrf_token"] != session["csrf_token"]:
+            abort(403)
+
+        return f(*args, **kwargs)
+    return decorated_function
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "username" not in session:
+            abort(403)
+
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route("/")
 def index():
@@ -83,15 +102,15 @@ def register():
     return redirect("/")
 
 @app.route("/logout", methods=["POST"])
+@csrf_required
 def logout():
-    check_csrf()
-
     del session["username"]
     del session["user_id"]
     flash("Kirjauduttu ulos")
     return redirect("/")
 
 @app.route("/create")
+@login_required
 def create_page():
     res = db.query("SELECT c.name, v.value, v.id, c.id FROM classes c, class_value v WHERE v.class = c.id ORDER BY c.name, v.value")
 
@@ -110,12 +129,9 @@ def create_page():
     return render_template("create.html", classes=classes)
 
 @app.route("/create", methods=["POST"])
+@csrf_required
+@login_required
 def create():
-    check_csrf()
-    
-    if "username" not in session:
-        return redirect("/", code=403)
-
     name = request.form["name"]
     source_link = request.form["source_link"]
     download_link = request.form["download_link"]
@@ -152,22 +168,23 @@ def program_page(program_id):
     return render_template("program.html", name=name, author_name=author_name, author_id=author_id, source_link=source_link, download_link=download_link, description=description, program_id=program_id, can_review=can_review, reviews=reviews, grade=grade, classes=classes)
 
 @app.route("/p/<int:program_id>/edit")
+@login_required
 def program_edit_page(program_id):
     try:
-        name, source_link, download_link, description, program_id = db.query("SELECT p.name, p.source_link, p.download_link, p.description, p.id FROM programs p, users u WHERE p.author = u.id AND p.id = ?", [program_id])[0]
+        name, source_link, download_link, description, program_id, author_id = db.query("SELECT p.name, p.source_link, p.download_link, p.description, p.id, u.id FROM programs p, users u WHERE p.author = u.id AND p.id = ?", [program_id])[0]
     except IndexError:
         flash("Sovellusta ei löytynyt")
         return redirect("/", 404)
 
+    if session["user_id"] != author_id:
+        abort(403)
+
     return render_template("edit.html", name=name, source_link=source_link, download_link=download_link, description=description, program_id=program_id)
 
 @app.route("/p/<int:program_id>/edit", methods=["POST"])
+@csrf_required
+@login_required
 def program_edit(program_id):
-    check_csrf()
-    
-    if "username" not in session:
-        return redirect("/", code=403)
-
     name = request.form["name"]
     source_link = request.form["source_link"]
     download_link = request.form["download_link"]
@@ -178,21 +195,18 @@ def program_edit(program_id):
     return redirect(f"/p/{program_id}")
 
 @app.route("/p/<int:program_id>/delete", methods=["POST"])
+@csrf_required
+@login_required
 def delete_program(program_id):
-    check_csrf()
-
-    if "user_id" not in session:
-        return redirect("/", 404)
-
     db.execute("DELETE FROM programs WHERE id = ? AND author = ?", [program_id, session["user_id"]])
     db.execute("DELETE FROM program_class_value WHERE program = ?", [program_id])
 
     return redirect ("/")
 
 @app.route("/p/<int:program_id>/review", methods=["POST"])
+@csrf_required
+@login_required
 def review(program_id):
-    check_csrf()
-
     grade = request.form["grade"]
     comment = request.form["comment"]
 
@@ -243,6 +257,3 @@ def show_lines(content):
     content = "<p>" + content + "</p>"
     return markupsafe.Markup(content)
 
-def check_csrf():
-    if "csrf_token" not in session or request.form["csrf_token"] != session["csrf_token"]:
-        abort(403)
