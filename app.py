@@ -81,9 +81,9 @@ def login():
         flash("Virhe: väärä tunnus tai salasana")
         return render_template("login.html", username=username)
 
-    user_id, hash = queryres[0]
+    user_id, password_hash = queryres[0]
 
-    if not check_password_hash(hash, password):
+    if not check_password_hash(password_hash, password):
         flash("Virhe: väärä tunnus tai salasana")
         return render_template("login.html", username=username)
 
@@ -106,11 +106,11 @@ def register():
         flash("Virhe: salasanat eivät ole samat")
         return render_template("register.html", username=username)
 
-    hash = generate_password_hash(password1)
+    password_hash = generate_password_hash(password1)
 
     try:
         sql = "INSERT INTO users (username, password) VALUES (?, ?)"
-        db.execute(sql, [username, hash])
+        db.execute(sql, [username, password_hash])
     except sqlite3.IntegrityError:
         flash("Virhe: tunnus on jo varattu")
         return redirect("/register")
@@ -136,12 +136,12 @@ def create_page():
     classes = {}
     for class_value in res:
         # (class_name, class_id)
-        id = (class_value[0], class_value[3])
+        key = (class_value[0], class_value[3])
 
-        if id not in classes:
-            classes[id] = []
+        if key not in classes:
+            classes[key] = []
 
-        classes[id].append((class_value[1], class_value[2]))
+        classes[key].append((class_value[1], class_value[2]))
 
     classes = [{"name": x[0][0], "id": x[0][1], "options": x[1]}
                for x in classes.items()]

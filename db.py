@@ -13,22 +13,26 @@ class Database:
 
         conn = self._connection()
 
-        f = open("schema.sql", "r")
-        schema = f.read()
+        with open("schema.sql", "r", encoding="utf-8") as f:
+            schema = f.read()
 
         try:
             conn.executescript(schema)
         except sqlite3.OperationalError:
             pass
 
-        f = open("init.sql", "r")
-        initscript = f.read()
+        with open("init.sql", "r", encoding="utf-8") as f:
+            initscript = f.read()
 
         conn.executescript(initscript)
 
         conn.close()
 
-    def execute(self, query, params=[]):
+    def execute(self, query, params=None):
+        # PEP 8 recommended style
+        if params is None:
+            params = []
+
         conn = self._connection()
 
         try:
@@ -41,7 +45,11 @@ class Database:
         conn.close()
         return result.lastrowid
 
-    def query(self, query, params=[]):
+    def query(self, query, params=None):
+        # PEP 8 recommended style
+        if params is None:
+            params = []
+
         conn = self._connection()
 
         try:
@@ -55,4 +63,3 @@ class Database:
 
     def _connection(self):
         return sqlite3.connect(self.filename)
-
