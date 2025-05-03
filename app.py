@@ -34,37 +34,78 @@ def login_required(f):
 
 @app.route("/")
 def index():
-    # TODO: pagination
+    page = request.args.get("p", default=1)
+
+    try:
+        # zero-indexed
+        page = int(page) - 1
+    except ValueError:
+        # zero-indexed
+        page = 0
+
     sql = """SELECT p.id, p.name, p.description, u.username, u.id,
              IFNULL(AVG(r.grade), 0) FROM programs p, users u
              LEFT JOIN reviews r ON r.program = p.id
-             WHERE u.id = p.author GROUP BY p.id ORDER BY p.id DESC"""
-    programs = db.query(sql)
+             WHERE u.id = p.author GROUP BY p.id ORDER BY p.id DESC LIMIT ? OFFSET ?"""
+    programs = db.query(sql, [config.ITEMS_PER_PAGE + 1, page * config.ITEMS_PER_PAGE])
     programs = [{"id": p[0], "name": p[1], "description": p[2],
                  "author_name": p[3], "author_id": p[4], "grade": p[5]}
         for p in programs]
 
-    return render_template("index.html", programs=programs)
+    prev_page = None
+    next_page = None
+
+    if len(programs) == config.ITEMS_PER_PAGE + 1:
+        programs = programs[:-1]
+        next_page = page + 2 # +1 to one-index, +1 for the next page
+
+    if page > 0:
+        prev_page = page # page is zero-indexed, prev_page one-indexed
+
+    return render_template("index.html", programs=programs,
+                           next_page=next_page, prev_page=prev_page)
 
 @app.route("/search")
 def search():
     if "text" not in request.args:
         return redirect("/")
 
+    page = request.args.get("p", default=1)
+
+    try:
+        # zero-indexed
+        page = int(page) - 1
+    except ValueError:
+        # zero-indexed
+        page = 0
+
     searchtext = request.args["text"]
 
-    # TODO: pagination
     sql = """SELECT p.id, p.name, p.description, u.username, u.id,
              IFNULL(AVG(r.grade), 0) FROM programs p, users u
              LEFT JOIN reviews r ON r.program = p.id
              WHERE u.id = p.author AND (p.name LIKE ? OR p.description LIKE ?)
-             GROUP BY p.id ORDER BY p.id DESC"""
-    programs = db.query(sql, ["%" + searchtext + "%", "%" + searchtext + "%"])
+             GROUP BY p.id ORDER BY p.id DESC LIMIT ? OFFSET ?"""
+    programs = db.query(sql, ["%" + searchtext + "%", "%" + searchtext + "%",
+                              config.ITEMS_PER_PAGE + 1,
+                              page * config.ITEMS_PER_PAGE])
     programs = [{"id": p[0], "name": p[1], "description": p[2],
                  "author_name": p[3], "author_id": p[4], "grade": p[5]}
         for p in programs]
 
-    return render_template("search.html", programs=programs)
+    prev_page = None
+    next_page = None
+
+    if len(programs) == config.ITEMS_PER_PAGE + 1:
+        programs = programs[:-1]
+        next_page = page + 2 # +1 to one-index, +1 for the next page
+
+    if page > 0:
+        prev_page = page # page is zero-indexed, prev_page one-indexed
+
+    return render_template("search.html", programs=programs,
+                           prev_page=prev_page, next_page=next_page,
+                           searchtext=searchtext)
 
 @app.route("/login")
 def login_page():
@@ -298,6 +339,15 @@ def review(program_id):
 
 @app.route("/u/<int:user_id>")
 def user_page(user_id):
+    page = request.args.get("p", default=1)
+
+    try:
+        # zero-indexed
+        page = int(page) - 1
+    except ValueError:
+        # zero-indexed
+        page = 0
+
     try:
         sql = """SELECT IFNULL(AVG(r.grade), 0), COUNT(r.id) FROM users u
                  LEFT JOIN reviews r ON r.author = u.id WHERE u.id = ?"""
@@ -319,11 +369,27 @@ def user_page(user_id):
     programs = [{"name": d[3], "description": d[4], "grade": d[5], "id": d[2],
                  "author_name": name, "author_id": user_id} for d in data]
     average_grade = sum(program["grade"] for program in programs)/len(programs)
+    program_count = len(programs)
+
+    prev_page = None
+    next_page = None
+
+    if len(programs) > config.ITEMS_PER_PAGE * (page + 1):
+        next_page = page + 2 # +1 to one-index, +1 for the next page
+
+    # have to use this instead of limiting and offsetting in the query
+    # because we need to calculate the program count and average grade
+    programs = programs[config.ITEMS_PER_PAGE * page
+                        :config.ITEMS_PER_PAGE * (page + 1)]
+
+    if page > 0:
+        prev_page = page # page is zero-indexed, prev_page one-indexed
 
     return render_template("user.html", name=name, programs=programs,
                            average_given_review=average_given_review,
-                           review_count=review_count,
-                           average_grade=average_grade)
+                           review_count=review_count, next_page=next_page,
+                           average_grade=average_grade, prev_page=prev_page,
+                           program_count=program_count, user_id=user_id)
 
 @app.template_filter()
 def show_lines(content):

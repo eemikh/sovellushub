@@ -12,4 +12,14 @@
 
 {% endfor %}
 
+<div>
+{% if prev_page %}
+<a href="/?p={{ prev_page }}">Edellinen sivu</a>
+{% endif %}
+
+{% if next_page %}
+<a href="/?p={{ next_page }}">Seuraava sivu</a>
+{% endif %}
+</div>
+
 {% endblock %}

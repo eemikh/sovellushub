@@ -6,4 +6,16 @@
 {% include "programcard.html" %}
 {% endfor %}
 
+<div>
+
+{% if prev_page %}
+<a href="/search?text={{ searchtext | urlencode }}&p={{ prev_page }}">Edellinen sivu</a>
+{% endif %}
+
+{% if next_page %}
+<a href="/search?text={{ searchtext | urlencode }}&p={{ next_page }}">Seuraava sivu</a>
+{% endif %}
+
+</div>
+
 {% endblock %}

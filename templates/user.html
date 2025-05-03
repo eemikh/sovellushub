@@ -8,7 +8,7 @@
 
 <p>Annettujen arvosteluiden määrä: {{ review_count }}</p>
 
-<p>Ohjelmien määrä: {{ programs | length }}</p>
+<p>Ohjelmien määrä: {{ program_count }}</p>
 
 <p>Ohjelmien arvosteluiden keskiarvo: {{ average_grade | roundf(1) }}</p>
 
@@ -17,5 +17,15 @@
 {% for program in programs %}
 {% include "programcard.html" %}
 {% endfor %}
+
+<div>
+{% if prev_page %}
+<a href="/u/{{ user_id }}?p={{ prev_page }}">Edellinen sivu</a>
+{% endif %}
+
+{% if next_page %}
+<a href="/u/{{ user_id }}?p={{ next_page }}">Seuraava sivu</a>
+{% endif %}
+</div>
 
 {% endblock %}
