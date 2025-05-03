@@ -1,0 +1,3 @@
+SECRET_KEY = "2d0428696ca1cfc52c25ab54228c171f"
+DATABASE_FILE = "database.db"
+RESET_DB = False

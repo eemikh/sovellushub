@@ -7,10 +7,11 @@ from flask import Flask, abort, flash, redirect, render_template, request, sessi
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from db import Database
+import config
 
 app = Flask(__name__)
-app.secret_key = "2d0428696ca1cfc52c25ab54228c171f"
-db = Database("database.db")
+app.secret_key = config.SECRET_KEY
+db = Database(config.DATABASE_FILE, reset=config.RESET_DB)
 
 def csrf_required(f):
     @wraps(f)
