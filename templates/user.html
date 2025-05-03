@@ -4,13 +4,13 @@
 
 <h1>{{ name }}</h1>
 
-<p>Annettujen arvosteluiden keskiarvo: {{ average_given_review }}</p>
+<p>Annettujen arvosteluiden keskiarvo: {{ average_given_review | roundf(1) }}</p>
 
 <p>Annettujen arvosteluiden määrä: {{ review_count }}</p>
 
-<p>Ohjelmien määrä: {{ programs|length }}</p>
+<p>Ohjelmien määrä: {{ programs | length }}</p>
 
-<p>Ohjelmien arvosteluiden keskiarvo: {{ average_grade }}</p>
+<p>Ohjelmien arvosteluiden keskiarvo: {{ average_grade | roundf(1) }}</p>
 
 <hr>
 

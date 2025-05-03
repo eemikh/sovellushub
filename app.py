@@ -258,3 +258,7 @@ def show_lines(content):
     content = "<p>" + content + "</p>"
     return markupsafe.Markup(content)
 
+@app.template_filter("roundf")
+def roundf_filter(content, digits):
+    return round(float(content), ndigits=digits)
+

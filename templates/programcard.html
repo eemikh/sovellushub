@@ -3,7 +3,7 @@
 
   <div style="margin-top: -13px">
     <a href="/u/{{ program.author_id }}" class="internallink" style="display: inline-block">{{ program.author_name }}</a>
-    <div style="display: inline-block; float: right; margin-right: 5px">Arvosana {{ program.grade }}</div>
+    <div style="display: inline-block; float: right; margin-right: 5px">Arvosana {{ program.grade | roundf(1) }}</div>
   </div>
 
   <hr>
