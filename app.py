@@ -4,14 +4,13 @@ import sqlite3
 
 import markupsafe
 from flask import Flask, abort, flash, redirect, render_template, request, session
-from werkzeug.security import check_password_hash, generate_password_hash
 
-from db import Database
+from db import db
+from user import create_user, login, user_programs, user_stats, UserExists, UserNotFound, WrongCredentials
 import config
 
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
-db = Database(config.DATABASE_FILE, reset=config.RESET_DB)
 
 def csrf_required(f):
     @wraps(f)
@@ -112,19 +111,13 @@ def login_page():
     return render_template("login.html", username="")
 
 @app.route("/login", methods=["POST"])
-def login():
+def login_form():
     username = request.form["username"]
     password = request.form["password"]
-    sql = "SELECT id, password FROM users WHERE username = ?"
-    queryres = db.query(sql, [username])
 
-    if len(queryres) == 0:
-        flash("Virhe: väärä tunnus tai salasana")
-        return render_template("login.html", username=username)
-
-    user_id, password_hash = queryres[0]
-
-    if not check_password_hash(password_hash, password):
+    try:
+        user_id = login(username, password)
+    except WrongCredentials:
         flash("Virhe: väärä tunnus tai salasana")
         return render_template("login.html", username=username)
 
@@ -147,12 +140,9 @@ def register():
         flash("Virhe: salasanat eivät ole samat")
         return render_template("register.html", username=username)
 
-    password_hash = generate_password_hash(password1)
-
     try:
-        sql = "INSERT INTO users (username, password) VALUES (?, ?)"
-        db.execute(sql, [username, password_hash])
-    except sqlite3.IntegrityError:
+        create_user(username, password1)
+    except UserExists:
         flash("Virhe: tunnus on jo varattu")
         return redirect("/register")
 
@@ -161,6 +151,7 @@ def register():
 
 @app.route("/logout", methods=["POST"])
 @csrf_required
+@login_required
 def logout():
     del session["username"]
     del session["user_id"]
@@ -345,51 +336,20 @@ def user_page(user_id):
         # zero-indexed
         page = int(page) - 1
     except ValueError:
-        # zero-indexed
         page = 0
 
     try:
-        sql = """SELECT IFNULL(AVG(r.grade), 0), COUNT(r.id) FROM users u
-                 LEFT JOIN reviews r ON r.author = u.id WHERE u.id = ?"""
-        average_given_review, review_count = db.query(sql, [user_id])[0]
+        stats = user_stats(user_id)
+        programs = user_programs(user_id, page=page)
+    except UserNotFound:
+        abort(404)
 
-        sql = """SELECT u.id, u.username, p.id, p.name, p.description,
-                 IFNULL(AVG(r.grade), 0) FROM users u
-                 LEFT JOIN programs p ON p.author = u.id
-                 LEFT JOIN reviews r ON r.program = p.id
-                 WHERE u.id = ? GROUP BY p.id ORDER BY p.id ASC"""
-        data = db.query(sql, [user_id])
+    prev_page = page if page > 0 else None
+    next_page = page + 2 if programs.has_more else None
 
-        user_id = data[0][0]
-        name = data[0][1]
-    except IndexError:
-        flash("Käyttäjää ei löytynyt")
-        return redirect("/", 404)
-
-    programs = [{"name": d[3], "description": d[4], "grade": d[5], "id": d[2],
-                 "author_name": name, "author_id": user_id} for d in data]
-    average_grade = sum(program["grade"] for program in programs)/len(programs)
-    program_count = len(programs)
-
-    prev_page = None
-    next_page = None
-
-    if len(programs) > config.ITEMS_PER_PAGE * (page + 1):
-        next_page = page + 2 # +1 to one-index, +1 for the next page
-
-    # have to use this instead of limiting and offsetting in the query
-    # because we need to calculate the program count and average grade
-    programs = programs[config.ITEMS_PER_PAGE * page
-                        :config.ITEMS_PER_PAGE * (page + 1)]
-
-    if page > 0:
-        prev_page = page # page is zero-indexed, prev_page one-indexed
-
-    return render_template("user.html", name=name, programs=programs,
-                           average_given_review=average_given_review,
-                           review_count=review_count, next_page=next_page,
-                           average_grade=average_grade, prev_page=prev_page,
-                           program_count=program_count, user_id=user_id)
+    return render_template("user.html", name=stats.name, stats=stats,
+                           programs=programs.programs, next_page=next_page,
+                           prev_page=prev_page, user_id=user_id)
 
 @app.template_filter()
 def show_lines(content):

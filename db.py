@@ -1,6 +1,8 @@
 import sqlite3
 import os
 
+import config
+
 class Database:
     def __init__(self, filename: str, reset: bool = False):
         self.filename = filename
@@ -63,3 +65,5 @@ class Database:
 
     def _connection(self):
         return sqlite3.connect(self.filename)
+
+db = Database(config.DATABASE_FILE, reset=config.RESET_DB)
