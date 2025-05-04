@@ -23,7 +23,7 @@
 
 <p><a class="internallink" href="/u/{{ program.author_id }}">{{ program.author_name }}</a></p>
 
-<div style="display: flex; border: 1px solid; border-radius: 4px; padding: 5px;">
+<div style="display: flex; flex-direction: column; border: 1px solid; border-radius: 4px; padding: 5px;">
   {% for class in program.classes %}
   <div style="flex-grow: 1">
     <p><b>{{ class[0] }}</b></p>
@@ -76,7 +76,7 @@
 <h2>Arvostelut</h2>
 
 {% for review in reviews %}
-<div style="border: 1px solid; border-radius: 5px; padding: 10px;">
+<div style="border: 1px solid; border-radius: 5px; padding: 10px; margin-bottom: 5px;">
   <h2>{{ review.grade }}/5</h2>
   <p><a class="internallink" href="/u/{{ review.author_id }}">{{ review.author_name }}</a></p>
   <hr>
