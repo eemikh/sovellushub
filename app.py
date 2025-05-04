@@ -215,7 +215,7 @@ def program_edit_page(program_id):
         program = get_program(program_id)
     except IndexError:
         flash("Sovellusta ei löytynyt")
-        return redirect("/", 404)
+        abort(404)
 
     if session["user_id"] != program.author_id:
         abort(403)
