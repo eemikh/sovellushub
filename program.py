@@ -29,15 +29,21 @@ def get_program(program_id):
              ORDER BY c.name, cv.value"""
     classes = db.query(sql, [program_id])
 
-    return Program(name, program_id, author_name, author_id, description, source_link, download_link, grade, classes)
+    return Program(name, program_id, author_name, author_id, description,
+                   source_link, download_link, grade, classes)
 
 def get_programs(page=0):
+    # a subquery is used because it is much faster
     sql = """SELECT p.id, p.name, p.description, u.username, u.id,
-             IFNULL(AVG(r.grade), 0) FROM programs p, users u
+             IFNULL(AVG(r.grade), 0) FROM
+             (SELECT id, name, description, author
+             FROM programs ORDER BY id DESC LIMIT ? OFFSET ?) p, users u
              LEFT JOIN reviews r ON r.program = p.id
-             WHERE u.id = p.author GROUP BY p.id ORDER BY p.id DESC LIMIT ? OFFSET ?"""
-    programs = db.query(sql, [config.ITEMS_PER_PAGE + 1, page * config.ITEMS_PER_PAGE])
-    programs = [Program(p[1], p[0], p[3], p[4], p[2], None, None, p[5], None) for p in programs]
+             WHERE u.id = p.author GROUP BY p.id ORDER BY p.id DESC"""
+    programs = db.query(sql, [config.ITEMS_PER_PAGE + 1,
+                              page * config.ITEMS_PER_PAGE])
+    programs = [Program(p[1], p[0], p[3], p[4], p[2], None, None, p[5], None)
+                for p in programs]
 
     has_more = False
 
@@ -48,15 +54,18 @@ def get_programs(page=0):
     return ProgramListing(programs, has_more)
 
 def search_programs(searchtext, page=0):
+    # a subquery is used because it is much faster
     sql = """SELECT p.id, p.name, p.description, u.username, u.id,
-             IFNULL(AVG(r.grade), 0) FROM programs p, users u
-             LEFT JOIN reviews r ON r.program = p.id
-             WHERE u.id = p.author AND (p.name LIKE ? OR p.description LIKE ?)
-             GROUP BY p.id ORDER BY p.id DESC LIMIT ? OFFSET ?"""
+             IFNULL(AVG(r.grade), 0) FROM
+             (SELECT id, name, description, author FROM programs
+             WHERE name LIKE ? OR description LIKE ? ORDER BY id DESC LIMIT ?
+             OFFSET ?) p, users u LEFT JOIN reviews r ON r.program = p.id
+             WHERE u.id = p.author GROUP BY p.id ORDER BY p.id DESC"""
     programs = db.query(sql, ["%" + searchtext + "%", "%" + searchtext + "%",
                               config.ITEMS_PER_PAGE + 1,
                               page * config.ITEMS_PER_PAGE])
-    programs = [Program(p[1], p[0], p[3], p[4], p[2], None, None, p[5], None) for p in programs]
+    programs = [Program(p[1], p[0], p[3], p[4], p[2], None, None, p[5], None)
+                for p in programs]
 
     has_more = False
 
@@ -82,7 +91,8 @@ def create_program(author_id, name, source_link, download_link, description,
 
     return program_id
 
-def update_program(program_id, author_id, name, source_link, download_link, description):
+def update_program(program_id, author_id, name, source_link, download_link,
+                   description):
     sql = """UPDATE programs SET name = ?, source_link = ?, download_link = ?,
              description = ? WHERE id = ? AND author = ?"""
     db.execute(sql, [name, source_link, download_link, description, program_id,

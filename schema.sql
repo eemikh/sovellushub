@@ -13,6 +13,8 @@ CREATE TABLE programs (
     description TEXT
 );
 
+CREATE INDEX idx_pauthor ON programs (author);
+
 CREATE TABLE reviews (
     id INTEGER PRIMARY KEY,
     author INTEGER REFERENCES users,

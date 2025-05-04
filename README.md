@@ -29,6 +29,11 @@ Käytettävyyttä parantavia ominaisuuksia, kuten arvosteluiden muokkaaminen ja 
 muokkaaminen, olisi hyvä lisätä.
 Myös koodin laatua ja tyyliohjeiden noudattavuutta olisi syytä parantaa ennen viimeistä palautusta.
 
+## Lopullinen palautus
+
+Lopullinen sovellus on kuin ylhäällä alun perin kuvailtu. Joitain pieniä käytettävyysominaisuuksia
+puuttuu, mutta suurempia käytettävyysongelmia ei ole sovelluksessa.
+
 ## Ajaminen
 
 Komennolla
@@ -39,3 +44,18 @@ flask run
 
 käynnistetään Flaskin devausympäristö, jossa verkkosivua voi kokeilla.
 Oletuksena tietokanta luodaan automaattisesti tiedostoon `database.db`, jos sitä ei ole jo olemassa.
+
+## Suorituskyky
+
+Komento
+
+```
+python seed.py
+```
+
+lisää tietokantaan automaattisesti 10 000 käyttäjää, joista jokaisella on keskimäärin 250 ohjelmaa
+ja 500 arvostelua satunnaisissa ohjelmissa. Kokeilin tällaisella tietokannalla eri sivujen
+lataamisen nopeuksia. Kun ladataan etusivu sivulla 100 000, sivu latautuu 0,19 sekunnissa.
+Satunnaisesti valitun käyttäjäsivun viimeisen sivun lataaminen kestää 0,01 sekuntia. Hakeminen
+hakusanalla "linux" onnistuu 0,0 sekunnissa ja viimeinen sivu (tässä tapauksesas 6967) latautuu 0,62
+sekunnissa.
