@@ -179,11 +179,17 @@ def create():
         or len(description) > 5000):
         abort(400)
 
-    all_classes = class_ids()
+    classes = get_classes()
 
     values = []
-    for clas in all_classes:
-        values.append(request.form[f"class{clas}"])
+    for clas in classes:
+        options = [str(opt.id) for opt in clas.options]
+        value = request.form[f"class{clas.id}"]
+
+        if value not in options:
+            abort(400)
+
+        values.append(value)
 
     try:
         program_id = create_program(session["user_id"], name, source_link,
