@@ -21,7 +21,7 @@
 
 <h2 style="margin-top: 0px;">{{ program.grade | roundf(1) }}/5</h2>
 
-<p><a href="/u/{{ program.author_id }}">{{ program.author_name }}</a></p>
+<p><a class="internallink" href="/u/{{ program.author_id }}">{{ program.author_name }}</a></p>
 
 <div style="display: flex; border: 1px solid; border-radius: 4px; padding: 5px;">
   {% for class in program.classes %}
@@ -78,7 +78,7 @@
 {% for review in reviews %}
 <div style="border: 1px solid; border-radius: 5px; padding: 10px;">
   <h2>{{ review.grade }}/5</h2>
-  <p><a href="/u/{{ review.author_id }}">{{ review.author_name }}</a></p>
+  <p><a class="internallink" href="/u/{{ review.author_id }}">{{ review.author_name }}</a></p>
   <hr>
   <p>{{ review.comment | show_lines }}</p>
 </div>
