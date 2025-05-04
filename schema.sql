@@ -22,6 +22,8 @@ CREATE TABLE reviews (
     UNIQUE(author, program) ON CONFLICT ABORT
 );
 
+CREATE INDEX idx_reviews on reviews (program);
+
 CREATE TABLE classes (
     id INTEGER PRIMARY KEY,
     name TEXT UNIQUE
@@ -38,3 +40,5 @@ CREATE TABLE program_class_value (
     program INTEGER REFERENCES programs,
     value INTEGER REFERENCES class_value
 );
+
+CREATE INDEX idx_pcv on program_class_value (program);
