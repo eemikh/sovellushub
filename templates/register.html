@@ -5,15 +5,15 @@
   <form ation="/register" method="post">
     <p>
       <label for="username">Käyttäjänimi:</label> <br/>
-      <input id="username" type="text" name="username" value="{{ username }}" required />
+      <input id="username" type="text" name="username" value="{{ username }}" maxlength="25" required />
     </p>
     <p>
       <label for="password">Salasana:</label> <br/>
-      <input id="password" type="password" name="password1" required />
+      <input id="password" type="password" name="password1" minlength="6" maxlength="128" required />
     </p>
     <p>
       <label for="password2">Toista salasana:</label> <br/>
-      <input id="password2" type="password" name="password2" required />
+      <input id="password2" type="password" name="password2" minlength="6" maxlength="128" required />
     </p>
     <input type="submit" value="Luo tunnus" />
   </form>

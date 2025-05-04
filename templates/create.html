@@ -3,13 +3,13 @@
 {% block content %}
 <form action="/create" method="post">
   <label for="name">Sovelluksen nimi:</label> <br/>
-  <input type="text" id="name" name="name" size="40" placeholder="SovellusHub" requided /> <br/>
+  <input type="text" id="name" name="name" size="40" placeholder="SovellusHub" maxlength="50" required /> <br/>
 
   <label for="source_link">Linkki sovelluksen lähdekoodiin:</label> <br/>
-  <input type="text" id="source_link" name="source_link" size="40" placeholder="https://github.com/eemikh/sovellushub" required /> <br/>
+  <input type="text" id="source_link" name="source_link" size="40" placeholder="https://github.com/eemikh/sovellushub" maxlength="240" required /> <br/>
 
   <label for="download_link">Linkki sovelluksen lataukseen:</label> <br/>
-  <input type="text" id="download_link" name="download_link" size="40" required /> <br/>
+  <input type="text" id="download_link" name="download_link" size="40" maxlength="240" required /> <br/>
 
   {% for class in classes %}
   <label for="class{{ class.id }}">{{ class.name }}:</label> <br/>
@@ -24,7 +24,7 @@
   {% endfor %}
 
   <label for="description">Sovelluksen kuvaus:</label> <br/>
-  <textarea id="description" name="description" rows=10 cols=80 placeholder="Kuvaus siitä, mitä sovellus tekee" required></textarea> <br/>
+  <textarea id="description" name="description" rows=10 cols=80 placeholder="Kuvaus siitä, mitä sovellus tekee" maxlength="5000" required></textarea> <br/>
 
   <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}"></input>
 

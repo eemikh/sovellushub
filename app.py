@@ -107,6 +107,10 @@ def register():
         flash("Virhe: salasanat eivät ole samat")
         return render_template("register.html", username=username)
 
+    if (len(password1) < 6 or not username or len(username) > 25
+        or len(password1) > 128):
+        abort(400)
+
     try:
         create_user(username, password1)
     except UserExists:
@@ -147,6 +151,11 @@ def create():
                 or download_link.startswith("https://"))):
         flash("Virhe: virheellinen linkki")
         return redirect("/create")
+
+    if (not name or not source_link or not download_link or not description
+        or len(name) > 50 or len(source_link) > 240 or len(download_link) > 240
+        or len(description) > 5000):
+        abort(400)
 
     all_classes = class_ids()
 
@@ -207,6 +216,10 @@ def program_edit(program_id):
         flash("Virhe: virheellinen linkki")
         return redirect(f"/p/{program_id}/edit")
 
+    if (not name or not source_link or not download_link or not description
+        or len(name) > 50 or len(source_link) > 240 or len(download_link) > 240
+        or len(description) > 5000):
+        abort(400)
 
     update_program(program_id, session["user_id"], name, source_link, download_link, description)
 
@@ -244,6 +257,9 @@ def review(program_id):
     if grade < 1 or grade > 5:
         flash("Virhe: vääränlainen arvosana")
         return redirect(f"/p/{program_id}")
+
+    if not comment or len(comment) > 2000:
+        abort(400)
 
     try:
         review_program(program_id, session["user_id"], grade, comment)
