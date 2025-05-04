@@ -89,10 +89,10 @@ def update_program(program_id, author_id, name, source_link, download_link, desc
                      author_id])
 
 def delete_program(program_id):
-    db.execute("DELETE FROM programs WHERE id = ?",
-               [program_id])
+    db.execute("DELETE FROM programs WHERE id = ?", [program_id])
     db.execute("DELETE FROM program_class_value WHERE program = ?",
                [program_id])
+    db.execute("DELETE FROM reviews WHERE program = ?", [program_id])
 
 def review_program(program_id, author_id, grade, comment):
     try:
