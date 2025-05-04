@@ -3,28 +3,28 @@
 {% block content %}
 
 <div style="display: flex; align-items: center;">
-  <h1>{{ name }}</h1>
+  <h1>{{ program.name }}</h1>
 
-  {% if session.user_id == author_id %}
+  {% if session.user_id == program.author_id %}
   <div style="flex-grow: 1"></div>
 
-  <form action="/p/{{ program_id }}/edit" style="margin-right: 10px;">
+  <form action="/p/{{ program.id }}/edit" style="margin-right: 10px;">
     <input type="submit" value="Muokkaa sovellusta"></input>
   </form>
 
-  <form action="/p/{{ program_id }}/delete" method="post">
+  <form action="/p/{{ program.id }}/delete" method="post">
     <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}"></input>
     <input type="submit" value="Poista sovellus"></input>
   </form>
   {% endif %}
 </div>
 
-<h2 style="margin-top: 0px;">{{ grade }}/5</h2>
+<h2 style="margin-top: 0px;">{{ program.grade | roundf(1) }}/5</h2>
 
-<p><a href="/u/{{ author_id }}">{{ author_name }}</a></p>
+<p><a href="/u/{{ program.author_id }}">{{ program.author_name }}</a></p>
 
 <div style="display: flex; border: 1px solid; border-radius: 4px; padding: 5px;">
-  {% for class in classes %}
+  {% for class in program.classes %}
   <div style="flex-grow: 1">
     <p><b>{{ class[0] }}</b></p>
     <p>{{ class[1] }}</p>
@@ -33,23 +33,23 @@
 
   <div style="flex-grow: 1">
     <p><b>Lähdekoodi</b></p>
-    <p><a href="{{ source_link }}" target="_blank">{{ source_link }}</a></p>
+    <p><a href="{{ program.source_link }}" target="_blank">{{ program.source_link }}</a></p>
   </div>
 
   <div style="flex-grow: 1">
     <p><b>Lataus</b></p>
-    <p><a href="{{ download_link }}" target="_blank">{{ download_link }}</a></p>
+    <p><a href="{{ program.download_link }}" target="_blank">{{ program.download_link }}</a></p>
   </div>
 </div>
 
-<p>{{ description | show_lines }}</p>
+<p>{{ program.description | show_lines }}</p>
 
 <hr>
 
 {% if can_review %}
 <p>Anna arvostelu:</p>
 
-<form action="/p/{{ program_id }}/review" method="post">
+<form action="/p/{{ program.id  }}/review" method="post">
   <label for="grade">Arvosana:</label>
   <select id="grade" name="grade">
     <option value="">Ei arvosanaa</option>
@@ -78,7 +78,7 @@
 {% for review in reviews %}
 <div style="border: 1px solid; border-radius: 5px; padding: 10px;">
   <h2>{{ review.grade }}/5</h2>
-  <p><a href="/u/{{ review.user_id }}">{{ review.username }}</a></p>
+  <p><a href="/u/{{ review.author_id }}">{{ review.author_name }}</a></p>
   <hr>
   <p>{{ review.comment | show_lines }}</p>
 </div>

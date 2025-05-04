@@ -5,6 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from db import db
 import config
+from program import Program
 
 def create_user(username, password):
     password_hash = generate_password_hash(password)
@@ -65,12 +66,11 @@ def user_programs(user_id, page=0):
     except IndexError:
         raise UserNotFound
 
-    programs = [{"name": d[3], "description": d[4], "grade": d[5], "id": d[2],
-                 "author_name": name, "author_id": user_id} for d in data]
-
     # PEP 8 recommended style
-    if programs[0]["name"] is None:
+    if data[0][2] is None:
         programs = []
+    else:
+        programs = [Program(d[3], d[2], name, user_id, d[4], None, None, d[5], None) for d in data]
 
     has_more = False
 
@@ -90,7 +90,7 @@ class UserStats:
 
 @dataclass
 class UserPrograms:
-    programs: list[dict]
+    programs: list[Program]
     has_more: bool
 
 class UserExists(Exception):

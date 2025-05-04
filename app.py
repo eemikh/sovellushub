@@ -1,12 +1,11 @@
 from functools import wraps
 import secrets
-import sqlite3
 
 import markupsafe
 from flask import Flask, abort, flash, redirect, render_template, request, session
 
-from db import db
 from user import create_user, login, user_programs, user_stats, UserExists, UserNotFound, WrongCredentials
+from program import get_programs, search_programs, get_classes, class_ids, create_program, ProgramExists, get_program, ProgramNotFound, get_reviews, update_program, delete_program, review_program, ReviewedAlready
 import config
 
 app = Flask(__name__)
@@ -31,37 +30,29 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@app.route("/")
-def index():
+# Returns the zero-indexed page number from query parameters showing to the
+# user as one-indexed
+def get_page():
     page = request.args.get("p", default=1)
 
     try:
         # zero-indexed
         page = int(page) - 1
     except ValueError:
-        # zero-indexed
         page = 0
 
-    sql = """SELECT p.id, p.name, p.description, u.username, u.id,
-             IFNULL(AVG(r.grade), 0) FROM programs p, users u
-             LEFT JOIN reviews r ON r.program = p.id
-             WHERE u.id = p.author GROUP BY p.id ORDER BY p.id DESC LIMIT ? OFFSET ?"""
-    programs = db.query(sql, [config.ITEMS_PER_PAGE + 1, page * config.ITEMS_PER_PAGE])
-    programs = [{"id": p[0], "name": p[1], "description": p[2],
-                 "author_name": p[3], "author_id": p[4], "grade": p[5]}
-        for p in programs]
+    return page
 
-    prev_page = None
-    next_page = None
+@app.route("/")
+def index():
+    page = get_page()
 
-    if len(programs) == config.ITEMS_PER_PAGE + 1:
-        programs = programs[:-1]
-        next_page = page + 2 # +1 to one-index, +1 for the next page
+    listing = get_programs(page=page)
 
-    if page > 0:
-        prev_page = page # page is zero-indexed, prev_page one-indexed
+    prev_page = page if page > 0 else None
+    next_page = page + 2 if listing.has_more else None
 
-    return render_template("index.html", programs=programs,
+    return render_template("index.html", programs=listing.programs,
                            next_page=next_page, prev_page=prev_page)
 
 @app.route("/search")
@@ -69,40 +60,16 @@ def search():
     if "text" not in request.args:
         return redirect("/")
 
-    page = request.args.get("p", default=1)
-
-    try:
-        # zero-indexed
-        page = int(page) - 1
-    except ValueError:
-        # zero-indexed
-        page = 0
-
+    page = get_page()
     searchtext = request.args["text"]
 
-    sql = """SELECT p.id, p.name, p.description, u.username, u.id,
-             IFNULL(AVG(r.grade), 0) FROM programs p, users u
-             LEFT JOIN reviews r ON r.program = p.id
-             WHERE u.id = p.author AND (p.name LIKE ? OR p.description LIKE ?)
-             GROUP BY p.id ORDER BY p.id DESC LIMIT ? OFFSET ?"""
-    programs = db.query(sql, ["%" + searchtext + "%", "%" + searchtext + "%",
-                              config.ITEMS_PER_PAGE + 1,
-                              page * config.ITEMS_PER_PAGE])
-    programs = [{"id": p[0], "name": p[1], "description": p[2],
-                 "author_name": p[3], "author_id": p[4], "grade": p[5]}
-        for p in programs]
+    listing = search_programs(searchtext, page=page)
 
-    prev_page = None
-    next_page = None
+    prev_page = page if page > 0 else None
+    next_page = page + 2 if listing.has_more else None
 
-    if len(programs) == config.ITEMS_PER_PAGE + 1:
-        programs = programs[:-1]
-        next_page = page + 2 # +1 to one-index, +1 for the next page
 
-    if page > 0:
-        prev_page = page # page is zero-indexed, prev_page one-indexed
-
-    return render_template("search.html", programs=programs,
+    return render_template("search.html", programs=listing.programs,
                            prev_page=prev_page, next_page=next_page,
                            searchtext=searchtext)
 
@@ -161,22 +128,7 @@ def logout():
 @app.route("/create")
 @login_required
 def create_page():
-    sql = """SELECT c.name, v.value, v.id, c.id FROM classes c, class_value v
-             WHERE v.class = c.id ORDER BY c.name, v.value"""
-    res = db.query(sql)
-
-    classes = {}
-    for class_value in res:
-        # (class_name, class_id)
-        key = (class_value[0], class_value[3])
-
-        if key not in classes:
-            classes[key] = []
-
-        classes[key].append((class_value[1], class_value[2]))
-
-    classes = [{"name": x[0][0], "id": x[0][1], "options": x[1]}
-               for x in classes.items()]
+    classes = get_classes()
 
     return render_template("create.html", classes=classes)
 
@@ -189,91 +141,48 @@ def create():
     download_link = request.form["download_link"]
     description = request.form["description"]
 
-    all_classes = db.query("SELECT c.id FROM classes c")
+    all_classes = class_ids()
 
     values = []
-    for (clas,) in all_classes:
+    for clas in all_classes:
         values.append(request.form[f"class{clas}"])
 
-    sql = """INSERT INTO programs (author, name, source_link, download_link,
-             description) VALUES (?, ?, ?, ?, ?)"""
-    program_id = db.execute(sql, [session["user_id"], name, source_link,
-                            download_link, description])
-
-    for value in values:
-        sql = "INSERT INTO program_class_value (program, value) VALUES (?, ?)"
-        db.execute(sql, [program_id, value])
+    try:
+        program_id = create_program(session["user_id"], name, source_link,
+                                    download_link, description, values)
+    except ProgramExists:
+        flash("Virhe: samalla nimellä on jo olemassa sovellus")
+        return render_template("create.html")
 
     return redirect(f"/p/{program_id}")
 
 @app.route("/p/<int:program_id>")
 def program_page(program_id):
     try:
-        sql = """SELECT p.name, u.username, u.id, p.source_link,
-                 p.download_link, p.description, IFNULL(AVG(r.grade), 0)
-                 FROM programs p, users u
-                 LEFT JOIN reviews r ON r.program = p.id
-                 WHERE p.author = u.id AND p.id = ?"""
-        res = db.query(sql, [program_id])[0]
-
-        name = res[0]
-        author_name = res[1]
-        author_id = res[2]
-        source_link = res[3]
-        download_link = res[4]
-        description = res[5]
-        grade = res[6]
-    except IndexError:
+        program = get_program(program_id)
+    except ProgramNotFound:
         flash("Sovellusta ei löytynyt")
-        return redirect("/", 404)
+        abort(404)
 
-    sql = """SELECT r.grade, r.comment, u.username, u.id
-             FROM users u, programs p LEFT JOIN reviews r ON r.program = p.id
-             WHERE u.id = r.author AND p.id = ?"""
-    reviews = db.query(sql, [program_id])
-    reviews = [{"grade": r[0], "comment": r[1], "username": r[2],
-                "user_id": r[3]} for r in reviews]
-
+    reviews = get_reviews(program_id)
     can_review = "user_id" in session
 
-    sql = """SELECT c.name, cv.value
-             FROM program_class_value pcv, class_value cv, classes c
-             WHERE pcv.program = ? AND pcv.value = cv.id AND c.id = cv.class
-             ORDER BY c.name, cv.value"""
-    classes = db.query(sql, [program_id])
-
-    return render_template("program.html", name=name, author_name=author_name,
-                           author_id=author_id, source_link=source_link,
-                           download_link=download_link,
-                           description=description, program_id=program_id,
-                           can_review=can_review, reviews=reviews, grade=grade,
-                           classes=classes)
+    return render_template("program.html", program=program,
+                           can_review=can_review, reviews=reviews)
 
 @app.route("/p/<int:program_id>/edit")
 @login_required
 def program_edit_page(program_id):
     try:
-        sql = """SELECT p.name, p.source_link, p.download_link, p.description,
-                 p.id, u.id FROM programs p, users u
-                 WHERE p.author = u.id AND p.id = ?"""
-        res = db.query(sql, [program_id])[0]
-
-        name = res[0]
-        source_link = res[1]
-        download_link = res[2]
-        description = res[3]
-        program_id = res[4]
-        author_id = res[5]
+        program = get_program(program_id)
     except IndexError:
         flash("Sovellusta ei löytynyt")
         return redirect("/", 404)
 
-    if session["user_id"] != author_id:
+    if session["user_id"] != program.author_id:
         abort(403)
 
-    return render_template("edit.html", name=name, source_link=source_link,
-                           download_link=download_link,
-                           description=description, program_id=program_id)
+    return render_template("edit.html", program=program)
 
 @app.route("/p/<int:program_id>/edit", methods=["POST"])
 @csrf_required
@@ -284,23 +193,25 @@ def program_edit(program_id):
     download_link = request.form["download_link"]
     description = request.form["description"]
 
-    sql = """UPDATE programs SET name = ?, source_link = ?, download_link = ?,
-             description = ? WHERE id = ? AND author = ?"""
-    db.execute(sql, [name, source_link, download_link, description, program_id,
-                     session["user_id"]])
+    update_program(program_id, session["user_id"], name, source_link, download_link, description)
 
     return redirect(f"/p/{program_id}")
 
 @app.route("/p/<int:program_id>/delete", methods=["POST"])
 @csrf_required
 @login_required
-def delete_program(program_id):
-    db.execute("DELETE FROM programs WHERE id = ? AND author = ?",
-               [program_id, session["user_id"]])
-    db.execute("DELETE FROM program_class_value WHERE program = ?",
-               [program_id])
+def delete_program_form(program_id):
+    try:
+        program = get_program(program_id)
+    except ProgramNotFound:
+        abort(404)
 
-    return redirect ("/")
+    if program.author_id != session["user_id"]:
+        abort(403)
+
+    delete_program(program_id)
+
+    return redirect("/")
 
 @app.route("/p/<int:program_id>/review", methods=["POST"])
 @csrf_required
@@ -320,23 +231,15 @@ def review(program_id):
         return redirect(f"/p/{program_id}")
 
     try:
-        sql = """INSERT INTO reviews (author, program, grade, comment)
-                 VALUES (?, ?, ?, ?)"""
-        db.execute(sql, [session["user_id"], program_id, grade, comment])
-    except sqlite3.IntegrityError:
+        review_program(program_id, session["user_id"], grade, comment)
+    except ReviewedAlready:
         flash("Virhe: olet jo lisännyt arvostelun")
 
     return redirect(f"/p/{program_id}")
 
 @app.route("/u/<int:user_id>")
 def user_page(user_id):
-    page = request.args.get("p", default=1)
-
-    try:
-        # zero-indexed
-        page = int(page) - 1
-    except ValueError:
-        page = 0
+    page = get_page()
 
     try:
         stats = user_stats(user_id)
