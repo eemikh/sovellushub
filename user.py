@@ -1,11 +1,12 @@
-from dataclasses import dataclass
 import sqlite3
+from dataclasses import dataclass
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from db import db
 import config
+from db import db
 from program import Program
+
 
 def create_user(username, password):
     password_hash = generate_password_hash(password)

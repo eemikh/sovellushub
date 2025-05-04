@@ -1,12 +1,34 @@
-from functools import wraps
 import secrets
+from functools import wraps
 
 import markupsafe
 from flask import Flask, abort, flash, redirect, render_template, request, session
 
-from user import create_user, login, user_programs, user_stats, UserExists, UserNotFound, WrongCredentials
-from program import get_programs, search_programs, get_classes, class_ids, create_program, ProgramExists, get_program, ProgramNotFound, get_reviews, update_program, delete_program, review_program, ReviewedAlready
 import config
+from program import (
+    ProgramExists,
+    ProgramNotFound,
+    ReviewedAlready,
+    class_ids,
+    create_program,
+    delete_program,
+    get_classes,
+    get_program,
+    get_programs,
+    get_reviews,
+    review_program,
+    search_programs,
+    update_program,
+)
+from user import (
+    UserExists,
+    UserNotFound,
+    WrongCredentials,
+    create_user,
+    login,
+    user_programs,
+    user_stats,
+)
 
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY

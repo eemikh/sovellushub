@@ -1,7 +1,8 @@
-import sqlite3
 import os
+import sqlite3
 
 import config
+
 
 class Database:
     def __init__(self, filename: str, reset: bool = False):

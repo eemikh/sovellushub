@@ -1,8 +1,9 @@
-from dataclasses import dataclass
 import sqlite3
+from dataclasses import dataclass
 
 import config
 from db import db
+
 
 def get_program(program_id):
     try:
