@@ -141,6 +141,13 @@ def create():
     download_link = request.form["download_link"]
     description = request.form["description"]
 
+    if (not (source_link.startswith("http://")
+             or source_link.startswith("https://"))
+        or not (download_link.startswith("http://")
+                or download_link.startswith("https://"))):
+        flash("Virhe: virheellinen linkki")
+        return redirect("/create")
+
     all_classes = class_ids()
 
     values = []
@@ -192,6 +199,14 @@ def program_edit(program_id):
     source_link = request.form["source_link"]
     download_link = request.form["download_link"]
     description = request.form["description"]
+
+    if (not (source_link.startswith("http://")
+             or source_link.startswith("https://"))
+        or not (download_link.startswith("http://")
+                or download_link.startswith("https://"))):
+        flash("Virhe: virheellinen linkki")
+        return redirect(f"/p/{program_id}/edit")
+
 
     update_program(program_id, session["user_id"], name, source_link, download_link, description)
 
